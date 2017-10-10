@@ -1,7 +1,7 @@
 SQL create table Statements:
 create table if not exists users(username text not null primary key,
                                  password text not null,
-                                 email not text null,
+                                 email text not null,
                                  firstName text not null,
                                  lastName text not null,
                                  gender text not null,
@@ -27,5 +27,6 @@ create table if not exists events (eventID text not null primary key,
                                    year text not null);
 								   
 create table if not exists auth(token text not null primary key,
-                                username text not null);
+                                username text not null,
+				loginTime integer not null);
                                    

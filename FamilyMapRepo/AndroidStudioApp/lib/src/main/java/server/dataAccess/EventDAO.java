@@ -1,4 +1,6 @@
 package server.dataAccess;
+import java.util.Arrays;
+
 import server.models.Event;
 
 /**
@@ -22,6 +24,16 @@ public class EventDAO {
      * @return the Event object that the row represents
      */
     public Event getEvent(String eventID)
+    {
+        return null;
+    }
+
+    /**
+     * Returns an array of all events where the descendant matches the given username
+     * @param username The username of the user for whom we're searching for all family events
+     * @return array of all family events
+     */
+    public Arrays getEvents(String username)
     {
         return null;
     }

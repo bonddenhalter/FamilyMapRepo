@@ -1,4 +1,6 @@
 package server.dataAccess;
+import java.util.Arrays;
+
 import server.models.Person;
 
 
@@ -27,4 +29,13 @@ public class PersonDAO {
         return null;
     }
 
+    /**
+     * Returns an array of the ancestors of the person with the given username
+     * @param username the username to match with the "descendants" field in the persons database
+     * @return all of the People objects that are ancestors of the given username
+     */
+    public Arrays getPeople (String username)
+    {
+        return null;
+    }
 }

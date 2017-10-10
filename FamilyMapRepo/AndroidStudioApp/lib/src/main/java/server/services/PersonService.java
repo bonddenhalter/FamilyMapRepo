@@ -7,12 +7,11 @@ import server.results.PersonResult;
 
 public class PersonService {
 
-    //SHOULD THIS LITERALLY RETURN A PERSON OBJECT??
     /**
      * Returns the single Person object with the specified ID.
      * @param personID the personID of the person you want
      * @param Token the authToken of the person you want
-     * @return the person with the specified ID
+     * @return the person with the specified ID. Null if there's an error.
      */
     public PersonResult person(String personID, String Token)
     {

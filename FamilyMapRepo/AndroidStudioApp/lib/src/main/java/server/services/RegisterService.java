@@ -12,7 +12,7 @@ public class RegisterService {
      * Creates a new user account, generates 4 generations of ancestor data for the new
      * user, logs the user in, and returns an auth token.
      * @param r the RegisterRequest object
-     * @return a RegisterResult object containing the auth token
+     * @return a RegisterResult object containing the auth token. Null if there's an error.
      */
     public RegisterResult register(RegisterRequest r)
     {

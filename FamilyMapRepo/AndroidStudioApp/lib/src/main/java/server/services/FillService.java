@@ -1,5 +1,4 @@
 package server.services;
-import server.requests.FillRequest;
 import server.results.FillResult;
 
 /**
@@ -8,7 +7,6 @@ import server.results.FillResult;
 
 public class FillService {
 
-    //USE FILLREQUEST CLASS???
 
     /**
      *  Populates the server's database with generated data for the specified user name.
@@ -16,7 +14,7 @@ public class FillService {
      * @param username must be a user already registered with the server
      * @param generations (optional) the number of generations of ancestors to be generated,
      *  and must be a non-negative integer (default is 4)
-     * @return
+     * @return a message in a FillResult class.
      */
     public FillResult fill(String username, int generations)
     {

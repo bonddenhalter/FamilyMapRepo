@@ -1,6 +1,0 @@
-server
-server.dataAccess
-server.models
-server.requests
-server.results
-server.services

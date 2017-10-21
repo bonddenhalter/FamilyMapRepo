@@ -15,7 +15,6 @@ public class Person {
         this.mother = mother;
         this.spouse = spouse;
     }
-
     private String personID;
     private String descendant;
     private String firstName;
@@ -24,6 +23,7 @@ public class Person {
     private String father;
     private String mother;
     private String spouse;
+
 
     public String getPersonID() {
         return personID;

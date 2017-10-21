@@ -4,8 +4,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import server.models.Person;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -32,7 +36,7 @@ public class PersonDAOTest {
         addPerson();
         getPerson();
         addPerson2();
-  //      getPeople();
+        getPeople();
     }
 
     @Test
@@ -91,7 +95,38 @@ public class PersonDAOTest {
 
 
     public void getPeople() throws Exception {
+        List<Person> people = personDAO.getPeople(descendant);
+        assertEquals(people.size(), 2);
+        for (Person p : people)
+        {
+            assertThat(p.getPersonID(), anyOf(is(personID), is(personID2))); //should match one of the two events we added
+            if (p.getPersonID().equals(personID)) //first event
+            {
+                assertEquals(p.getPersonID(), personID);
+                assertEquals(p.getDescendant(), descendant);
+                assertEquals(p.getFirstName(), firstName);
+                assertEquals(p.getLastName(), lastName);
+                assertEquals(p.getGender(), gender);
+                assertEquals(p.getFather(), father);
+                assertEquals(p.getMother(), mother);
+                assertEquals(p.getSpouse(), spouse);
+            }
+            else //must be second person
+            {
+                assertEquals(p.getPersonID(), personID2);
+                assertEquals(p.getDescendant(), descendant);
+                assertEquals(p.getFirstName(), firstName2);
+                assertEquals(p.getLastName(), lastName2);
+                assertEquals(p.getGender(), gender2);
+                assertEquals(p.getFather(), father2);
+                assertEquals(p.getMother(), mother2);
+                assertEquals(p.getSpouse(), spouse2);
+            }
+        }
 
+        //test nonexistent descendant
+        List<Person> people2 = personDAO.getPeople("nonexistent descendant");
+        assertTrue(people2.isEmpty());
     }
 
 }

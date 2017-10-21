@@ -5,6 +5,16 @@ package server.models;
  */
 
 public class Person {
+    public Person(String personID, String descendant, String firstName, String lastName, String gender, String father, String mother, String spouse) {
+        this.personID = personID;
+        this.descendant = descendant;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.gender = gender;
+        this.father = father;
+        this.mother = mother;
+        this.spouse = spouse;
+    }
 
     private String personID;
     private String descendant;

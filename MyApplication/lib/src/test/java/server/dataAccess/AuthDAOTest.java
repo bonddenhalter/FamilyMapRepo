@@ -50,9 +50,14 @@ public class AuthDAOTest {
 
     public void getAuth() throws Exception {
         Auth a = authDAO.getAuth(testToken);
+        assertNotNull(a);
         assertEquals(testToken, a.getToken());
         assertEquals(testUsername, a.getUsername());
         assertEquals(testLoginTime, a.getLoginTime());
+
+        //test nonexistent auth
+        Auth a2 = authDAO.getAuth("nonexistent auth");
+        assertNull(a2);
     }
 
 }

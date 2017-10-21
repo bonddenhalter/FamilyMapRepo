@@ -16,6 +16,18 @@ public class Event {
     private String eventType;
     private String year;
 
+    public Event(String eventID, String descendant, String person, double latitude, double longitude, String country, String city, String eventType, String year) {
+        this.eventID = eventID;
+        this.descendant = descendant;
+        this.person = person;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.country = country;
+        this.city = city;
+        this.eventType = eventType;
+        this.year = year;
+    }
+
     public String getEventID() {
         return eventID;
     }

@@ -1,11 +1,7 @@
 package server.dataAccess;
 
 
-import java.sql.Statement;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.List;
-import java.lang.Object;
 
 import server.models.Auth;
 
@@ -54,6 +50,7 @@ public class AuthDAO {
         stmt.setString(2, username);
         stmt.setInt(3, loginTime);
         stmt.executeUpdate();
+        stmt.close();
         connection.close();;
     }
 
@@ -70,12 +67,14 @@ public class AuthDAO {
         stmt.setString(1, token); //search for the row with the matching token
 
         ResultSet results = stmt.executeQuery();
+        if (!results.isBeforeFirst()) //if nothing found in database
+            return null;
         String tok = results.getString(1);
         String username = results.getString(2);
         int loginTime = results.getInt(3);
 
         Auth a = new Auth(tok, username, loginTime);
-        results.close(); //DO I HAVE TO CLOSE EVERTHING, INCLUDING THE CONNECTION?
+        results.close(); //DO I HAVE TO CLOSE EVERYTHING, INCLUDING THE CONNECTION?
         stmt.close();
         connection.close();
         return a;

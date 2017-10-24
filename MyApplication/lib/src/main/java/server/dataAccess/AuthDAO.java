@@ -80,6 +80,16 @@ public class AuthDAO {
         return a;
     }
 
+    public void clear() throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from auth";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
+
 
     /**
      * Joins a list of strings into a comma delimited string

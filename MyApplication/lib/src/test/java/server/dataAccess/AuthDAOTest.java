@@ -33,15 +33,16 @@ public class AuthDAOTest {
         createTable();
         addAuth();
         getAuth();
+        clear();
     }
 
     public void createTable() throws Exception {
         authDAO.createTable();
     }
 
-    String testToken = "fakeToken";
-    String testUsername = "fakeUsername";
-    int testLoginTime = 42;
+    public static String testToken = "fakeToken";
+    private String testUsername = "fakeUsername";
+    private int testLoginTime = 42;
 
     public void addAuth() throws Exception {
         Auth a = new Auth(testToken, testUsername, testLoginTime);
@@ -58,6 +59,14 @@ public class AuthDAOTest {
         //test nonexistent auth
         Auth a2 = authDAO.getAuth("nonexistent auth");
         assertNull(a2);
+    }
+
+    @Test
+    public void clear() throws Exception
+    {
+        authDAO.clear();
+        Auth a = authDAO.getAuth(testToken);
+        assertNull(a);
     }
 
 }

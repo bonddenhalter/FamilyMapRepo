@@ -137,4 +137,14 @@ public class EventDAO {
 
         return events;
     }
+
+    public void clear() throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from events";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
 }

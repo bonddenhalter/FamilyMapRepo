@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  */
 public class UserDAOTest {
 
-    UserDAO userDAO;
+    private UserDAO userDAO;
 
     @Before
     public void setUp() throws Exception {
@@ -31,6 +31,7 @@ public class UserDAOTest {
         createTable();
         addUser();
         getUser();
+        clear();
     }
 
     @Test
@@ -63,4 +64,11 @@ public class UserDAOTest {
         assertEquals(u.getPersonID(), personID);
     }
 
+    @Test
+    public void clear() throws Exception
+    {
+        userDAO.clear();
+        User u = userDAO.getUser(username);
+        assertNull(u);
+    }
 }

@@ -1,6 +1,6 @@
 package server.results;
 
-import java.util.Arrays;
+import server.models.Event;
 
 /**
  * Contains the results of an Events request
@@ -8,5 +8,20 @@ import java.util.Arrays;
 
 public class EventsResult {
 
-    private Arrays data; //an array of Event objects (as in EventResult)
+    private Event data[]; //an array of Event objects (as in EventResult)
+
+    public static final String failureMessage = "An error occured while retrieving the events.";
+
+
+    public EventsResult(Event[] data) {
+        this.data = data;
+    }
+
+    public Event[] getData() {
+        return data;
+    }
+
+    public void setData(Event[] data) {
+        this.data = data;
+    }
 }

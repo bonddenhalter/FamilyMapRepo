@@ -94,4 +94,14 @@ public class UserDAO {
         connection.close();
         return u;
     }
+
+    public void clear() throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from users";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
 }

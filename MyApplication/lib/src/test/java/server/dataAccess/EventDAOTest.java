@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class EventDAOTest {
 
-    private EventDAO eventDAO;
+    private static EventDAO eventDAO;
 
     @Before
     public void setUp() throws Exception {
@@ -36,6 +36,7 @@ public class EventDAOTest {
         getEvent();
         addEvent2();
         getEvents();
+        clear();
     }
 
 
@@ -44,24 +45,24 @@ public class EventDAOTest {
         eventDAO.createTable();
     }
 
-    private String eventID = "fake id";
-    private String descendant = "fake descendant";
-    private String person = "fake person";
-    private double latitude = 42.42;
-    private double longitude = 007.007;
-    private String country = "fake country";
-    private String city = "fake city";
-    private String eventType = "fake event type";
-    private String year = "fake year";
+    public static String eventID = "fake id";
+    public static String descendant = "fakeUsername";
+    public static String person = "fake person";
+    public static double latitude = 42.42;
+    public static double longitude = 007.007;
+    public static String country = "fake country";
+    public static String city = "fake city";
+    public static String eventType = "fake event type";
+    public static String year = "fake year";
 
-    private String eventID2 = "fake id 2";
-    private String person2 = "fake person 2";
-    private double latitude2 = 42.4202;
-    private double longitude2 = 007.00702;
-    private String country2 = "fake country 2";
-    private String city2 = "fake city 2";
-    private String eventType2 = "fake event type 2";
-    private String year2 = "fake year 2";
+    public static String eventID2 = "fake id 2";
+    public static String person2 = "fake person 2";
+    public static double latitude2 = 42.4202;
+    public static double longitude2 = 007.00702;
+    public static String country2 = "fake country 2";
+    public static String city2 = "fake city 2";
+    public static String eventType2 = "fake event type 2";
+    public static String year2 = "fake year 2";
 
 
     //delete database file first!
@@ -134,6 +135,14 @@ public class EventDAOTest {
         //test nonexistent descendant
         List<Event> events2 = eventDAO.getEvents("nonexistent descendant");
         assertTrue(events2.isEmpty());
+    }
+
+    @Test
+    public void clear() throws Exception
+    {
+        eventDAO.clear();
+        Event e = eventDAO.getEvent(eventID);
+        assertNull(e);
     }
 
 }

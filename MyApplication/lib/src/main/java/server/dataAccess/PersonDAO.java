@@ -133,4 +133,14 @@ public class PersonDAO {
 
         return people;
     }
+
+    public void clear() throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from persons";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
 }

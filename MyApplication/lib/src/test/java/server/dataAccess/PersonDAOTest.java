@@ -37,6 +37,7 @@ public class PersonDAOTest {
         getPerson();
         addPerson2();
         getPeople();
+        clear();
     }
 
     @Test
@@ -129,4 +130,11 @@ public class PersonDAOTest {
         assertTrue(people2.isEmpty());
     }
 
+    @Test
+    public void clear() throws Exception
+    {
+        personDAO.clear();
+        Person p = personDAO.getPerson(personID);
+        assertNull(p);
+    }
 }

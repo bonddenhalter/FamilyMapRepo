@@ -253,6 +253,8 @@ public class Facade {
            }
             personDAO.addPerson(user); //add user to the persons database
 
+            //I SUCCESSFULLY ADDED PEOPLE; NOW I NEED TO ADD EVENTS. I ALSO NEED TO CHANGE THE SUCCESS MESSAGE
+
         }
         catch (SQLException ex)
         {

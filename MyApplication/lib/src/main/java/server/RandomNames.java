@@ -30,7 +30,9 @@ public class RandomNames {
         //TEMP: LOADING WITH TEST DATA
         //NEEDS TO BE REPLACED WITH CODE TO READ FROM JSON
         femaleNames = Arrays.asList("Jill", "Jane", "Jenny");
-        maleNames
+        maleNames = Arrays.asList("Bob","Bill", "Bond");
+        lastNames = Arrays.asList("Johnson", "Stockton", "Young");
+        locations = Arrays.asList("New York", "Salt Lake", "Provo");
     }
 
     //return a random female name

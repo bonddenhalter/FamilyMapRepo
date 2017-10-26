@@ -134,6 +134,22 @@ public class PersonDAO {
         return people;
     }
 
+    /**
+     * Deletes all rows where the descendant matches the username
+     * @param username the username to delete
+     */
+    public void delete(String username) throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from persons where descendant = ?";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.setString(1, username); //search for the row with the matching username
+
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
+
     public void clear() throws SQLException
     {
         Connection connection = DriverManager.getConnection(connectionURL);

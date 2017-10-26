@@ -80,6 +80,22 @@ public class AuthDAO {
         return a;
     }
 
+    /**
+     * Deletes all rows with matching username
+     * @param username the username to delete
+     */
+    public void delete(String username) throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from auth where username = ?";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.setString(1, username); //search for the row with the matching username
+
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
+
     public void clear() throws SQLException
     {
         Connection connection = DriverManager.getConnection(connectionURL);

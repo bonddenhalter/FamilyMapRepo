@@ -20,9 +20,9 @@ public class Person {
     private String firstName;
     private String lastName;
     private String gender;
-    private String father;
-    private String mother;
-    private String spouse;
+    private String father; //personID
+    private String mother; //personID
+    private String spouse; //personID
 
 
     public String getPersonID() {

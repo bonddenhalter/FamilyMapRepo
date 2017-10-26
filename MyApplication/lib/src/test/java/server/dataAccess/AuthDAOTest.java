@@ -41,7 +41,7 @@ public class AuthDAOTest {
     }
 
     public static String testToken = "fakeToken";
-    private String testUsername = "fakeUsername";
+    public static String testUsername = "fakeUsername";
     private int testLoginTime = 42;
 
     public void addAuth() throws Exception {
@@ -59,6 +59,16 @@ public class AuthDAOTest {
         //test nonexistent auth
         Auth a2 = authDAO.getAuth("nonexistent auth");
         assertNull(a2);
+    }
+
+    @Test
+    public void delete() throws Exception
+    {
+        createTable();
+        addAuth();
+        authDAO.delete(testUsername);
+        Auth a = authDAO.getAuth(testUsername);
+        assertNull(a);
     }
 
     @Test

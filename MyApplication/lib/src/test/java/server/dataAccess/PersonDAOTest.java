@@ -131,6 +131,16 @@ public class PersonDAOTest {
     }
 
     @Test
+    public void delete() throws Exception
+    {
+        createTable();
+        addPerson();
+        personDAO.delete(descendant);
+        Person p = personDAO.getPerson(personID);
+        assertNull(p);
+    }
+
+    @Test
     public void clear() throws Exception
     {
         personDAO.clear();

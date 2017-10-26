@@ -138,6 +138,16 @@ public class EventDAOTest {
     }
 
     @Test
+    public void delete() throws Exception
+    {
+        createTable();
+        addEvent();
+        eventDAO.delete(descendant);
+        Event e = eventDAO.getEvent(eventID);
+        assertNull(e);
+    }
+
+    @Test
     public void clear() throws Exception
     {
         eventDAO.clear();

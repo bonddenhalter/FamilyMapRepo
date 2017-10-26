@@ -2,6 +2,8 @@ package server;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import server.dataAccess.AuthDAO;
 import server.dataAccess.EventDAO;
@@ -10,6 +12,7 @@ import server.dataAccess.UserDAO;
 import server.models.Auth;
 import server.models.Event;
 import server.models.Person;
+import server.models.User;
 import server.requests.LoadRequest;
 import server.requests.LoginRequest;
 import server.requests.RegisterRequest;
@@ -131,14 +134,65 @@ public class Facade {
 
     private String generatePersonID()
     {
-
+        return UUID.randomUUID().toString();
     }
 
-    private Person generatePersonData()
+   /* private String getRandomGender()
     {
-        //call generatePersonID();
+        Random rand = new Random();
+        int val = rand.nextInt(1); //get a 0 or 1
+        if (val == 0)
+            return "Male";
+        else if (val == 1)
+            return "Female";
+        else
+        {
+            System.out.println("Random Gender ERROR");
+            return null;
+        }
+
+
+    }*/ //this doesn't sense to have this
+
+    //recursive function to fill in person data
+    //adds ancestors to the database
+    //if generations is > 0, the user will not be added to the databse
+    private Person generatePersonData(String descendant, int generations, String gender) throws SQLException
+    {
+        String personID = generatePersonID();//call generatePersonID();
         //descendant is the user
+        RandomNames randNames = new RandomNames();
         //pull names from the given file
+        String firstName = (gender.equals("Male")) ? randNames.getRandomMaleName() : randNames.getRandomFemaleName();
+        String lastName = randNames.getRandomLastName();
+
+        String father = "";
+        String mother = "";
+        String spouse = "";
+
+        if (generations > 0)
+        {
+            Person dad = generatePersonData(descendant, generations - 1, "Male"); //call function to get father
+            Person mom = generatePersonData(descendant, generations - 1, "Female"); //call function to get mother
+
+            //set father and mother as spouses for each other
+            dad.setSpouse(mom.getPersonID());
+            mom.setSpouse(dad.getPersonID());
+
+            //set strings for their child
+            father = dad.getPersonID();
+            mother = mom.getPersonID();
+
+            personDAO.addPerson(dad);
+            personDAO.addPerson(mom);
+        }
+
+        Person me = new Person(personID, descendant, firstName, lastName, gender, father, mother, spouse);
+
+       // if (generations == 0)
+        //    personDAO.addPerson(me); //add self to database
+
+        return me; //return new person
     }
 
     /**
@@ -151,12 +205,71 @@ public class Facade {
      */
     public FillResult fill(String username, int generations)
     {
-        //check if there is any data already associated with the user name
+
+        try {
+            if (generations < 0)
+                throw new IllegalArgumentException(FillResult.negativeGenMessage) ;
+            //make sure the user is registered in the server
+            User u = userDAO.getUser(username);
+
+            if (u == null)
+                throw new NoSuchFieldException(FillResult.unregisteredUserMessage);
+
+            //check if there is any data already associated with the user name
             //if there is, delete it
-        //generate data
-        //add it to the database
+            //authDAO.delete(username); //I probably don't need to delete this
+            eventDAO.delete(username);
+            personDAO.delete(username);
+           // userDAO.delete(username); //don't delete here; they need to be registered
+
+           Person user = new Person("","","","","","","","");
+
+            //set info for the user
+            user.setPersonID(userDAO.getUser(username).getPersonID()); //we want the user's personID to be the same as in the user table
+            user.setFirstName(userDAO.getUser(username).getFirstName());
+            user.setLastName(userDAO.getUser(username).getLastName());
+            user.setGender(userDAO.getUser(username).getGender());
+            user.setSpouse("");
+            user.setFather("");
+            user.setMother("");
+            user.setDescendant(username);
+           if (generations > 0) //create ancestors and add them to database
+           {
+               Person dad = generatePersonData(username, generations - 1, "Male"); //call function to get father
+               Person mom = generatePersonData(username, generations - 1, "Female"); //call function to get mother
+
+               //set father and mother as spouses for each other
+               dad.setSpouse(mom.getPersonID());
+               mom.setSpouse(dad.getPersonID());
+
+               //add father and mother to database
+               personDAO.addPerson(dad);
+               personDAO.addPerson(mom);
+
+               //set strings for father and mother
+               user.setFather(dad.getPersonID());
+               user.setMother(mom.getPersonID());
+
+           }
+            personDAO.addPerson(user); //add user to the persons database
+
+        }
+        catch (SQLException ex)
+        {
+            return new FillResult(FillResult.SQLFailureMessage);
+        }
+        catch (IllegalArgumentException argEx)
+        {
+            return new FillResult(argEx.getMessage());
+        }
+        catch (NoSuchFieldException reg)
+        {
+            return new FillResult(reg.getMessage());
+        }
+        return new FillResult(FillResult.successMessage); //if all goes well
     }
 
+    //generations is optional
     public FillResult fill(String username)
     {
         return fill(username, 4); //default for generations is 4

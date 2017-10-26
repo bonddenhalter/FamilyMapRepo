@@ -4,12 +4,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import server.dataAccess.AuthDAOTest;
 import server.dataAccess.EventDAO;
 import server.dataAccess.EventDAOTest;
+import server.dataAccess.PersonDAO;
+import server.dataAccess.PersonDAOTest;
+import server.dataAccess.UserDAO;
+import server.dataAccess.UserDAOTest;
+import server.models.Person;
+import server.models.User;
 import server.results.ClearResult;
 import server.results.EventResult;
 import server.results.EventsResult;
+import server.results.FillResult;
 
 import static org.junit.Assert.*;
 import static server.dataAccess.EventDAOTest.city;
@@ -44,7 +53,7 @@ public class FacadeTest {
 
     @After
     public void tearDown() throws Exception {
-
+        facade.clear();
     }
 
     @Test
@@ -123,9 +132,114 @@ public class FacadeTest {
         assertNull(result);
     }
 
-    @Test
-    public void fill() throws Exception {
+    //end should be true if the person should not have father, mother, or spouse
+    private void checkPerson(Person p, String username, boolean end, boolean firstGen)
+    {
+//        assertNotNull(p);
+//        assertNotNull(p.getFirstName());
+//        assertNotNull(p.getLastName());
+//        assertNotNull(p.getPersonID());
+//        assertNotNull(p.getGender());
+        assertEquals(p.getDescendant(), username);
 
+        assertNotEquals(p.getFirstName(), "");
+        assertNotEquals(p.getLastName(), "");
+        assertNotEquals(p.getPersonID(), "");
+        assertNotEquals(p.getGender(), "");
+        assertNotEquals(p.getDescendant(), "");
+
+        if (end)
+        {
+//            assertNull(p.getSpouse());
+//            assertNull(p.getFather());
+//            assertNull(p.getMother());
+            if (firstGen)
+                assertEquals(p.getSpouse(), "");
+            else
+                assertNotEquals(p.getSpouse(), "");
+            assertEquals(p.getFather(), "");
+            assertEquals(p.getMother(), "");
+        }
+        else
+        {
+//            assertNotNull(p.getSpouse());
+//            assertNotNull(p.getFather());
+//            assertNotNull(p.getMother());
+            if (firstGen)
+                assertEquals(p.getSpouse(), "");
+            else
+                assertNotEquals(p.getSpouse(), "");
+            assertNotEquals(p.getFather(), "");
+            assertNotEquals(p.getMother(), "");
+        }
+    }
+
+    //checks the specified number of generations. On the first call, person should be the user, who is the bottom of the tree
+    private void checkTree(Person person, String username, int generations, PersonDAO personDAO, boolean firstGen) throws Exception
+    {
+        boolean end = (generations == 0);
+        checkPerson(person, username, end, firstGen); //check the current person
+        if (generations > 0) //more generations to go
+        {
+            Person dad = personDAO.getPerson(person.getFather());
+            Person mom = personDAO.getPerson(person.getMother());
+            checkTree(dad, username, generations - 1, personDAO, false);
+            checkTree(mom, username, generations - 1, personDAO, false);
+        }
+
+    }
+
+
+    @Test
+    public void fill() throws Exception
+    {
+        PersonDAOTest personDAOTest = new PersonDAOTest();
+        personDAOTest.setUp();
+        //personDAOTest.createTable();
+        personDAOTest.clear();
+
+        UserDAOTest userDAOTest = new UserDAOTest();
+        userDAOTest.setUp();
+        //userDAOTest.createTable();
+        userDAOTest.clear();
+        userDAOTest.addUser(); //register a user
+        String username = UserDAOTest.username; //use the username from UserDAOTest
+
+        //try a negative generation
+        FillResult result = facade.fill(username, -1);
+        assertEquals(result.getMessage(), FillResult.negativeGenMessage);
+
+        //try unregistered user
+        result = facade.fill("nonexistant username", 0);
+        assertEquals(result.getMessage(), FillResult.unregisteredUserMessage);
+
+        //give valid inputs
+        //try with generations = 0
+        result = facade.fill(username, 0);
+        assertEquals(result.getMessage(), FillResult.successMessage);
+        //user should be in database with no father, mother or spouse
+        PersonDAO personDAO = new PersonDAO();
+        List<Person> people = personDAO.getPeople(username);
+        assertEquals(people.size(), 1);
+        Person p = people.get(0);
+        checkPerson(p, username, true, true);
+
+            //try with generations blank
+                //check that 4 generations exist
+        personDAOTest.clear();
+        result = facade.fill(username);
+        assertEquals(result.getMessage(), FillResult.successMessage);
+        UserDAO userDAO = new UserDAO();
+        Person user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
+        checkTree(user, username, 4, personDAO, true);
+
+            //try with generations > 0
+                //check that generations exist
+        personDAO.clear();
+        result = facade.fill(username, 3);
+        assertEquals(result.getMessage(), FillResult.successMessage);
+        user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
+        checkTree(user, username, 3, personDAO, true);
     }
 
     @Test

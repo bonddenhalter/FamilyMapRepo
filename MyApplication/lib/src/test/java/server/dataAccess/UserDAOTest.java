@@ -39,7 +39,7 @@ public class UserDAOTest {
         userDAO.createTable();
     }
 
-    String username = "fake username";
+    public static String username = "fake username";
     String password = "fake password";
     String email = "fake email";
     String firstName = "fake first name";
@@ -62,6 +62,16 @@ public class UserDAOTest {
         assertEquals(u.getLastName(), lastName);
         assertEquals(u.getGender(), gender);
         assertEquals(u.getPersonID(), personID);
+    }
+
+    @Test
+    public void delete() throws Exception
+    {
+        createTable();
+        addUser();
+        userDAO.delete(username);
+        User u = userDAO.getUser(username);
+        assertNull(u);
     }
 
     @Test

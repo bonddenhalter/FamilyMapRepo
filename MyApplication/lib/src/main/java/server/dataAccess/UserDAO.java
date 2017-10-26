@@ -75,7 +75,7 @@ public class UserDAO {
         Connection connection = DriverManager.getConnection(connectionURL);
         String query = "select * from users where username = ? ";
         PreparedStatement stmt = connection.prepareStatement(query);
-        stmt.setString(1, username); //search for the row with the matching personID
+        stmt.setString(1, username); //search for the row with the matching username
 
         ResultSet results = stmt.executeQuery();
         if (!results.isBeforeFirst()) //if nothing found in database
@@ -94,6 +94,23 @@ public class UserDAO {
         connection.close();
         return u;
     }
+
+    /**
+     * Deletes all rows with matching username
+     * @param username the username to delete
+     */
+    public void delete(String username) throws SQLException
+    {
+        Connection connection = DriverManager.getConnection(connectionURL);
+        String clear = "delete from users where username = ?";
+        PreparedStatement stmt = connection.prepareStatement(clear);
+        stmt.setString(1, username); //search for the row with the matching username
+
+        stmt.executeUpdate();
+        stmt.close();
+        connection.close();
+    }
+
 
     public void clear() throws SQLException
     {

@@ -32,7 +32,8 @@ public class EventDAOTest {
     public void testEventDAO() throws Exception
     {
         createTable();
-        addEvent(); //delete database file first!
+        clear();
+        addEvent();
         getEvent();
         addEvent2();
         getEvents();
@@ -65,7 +66,6 @@ public class EventDAOTest {
     public static String year2 = "fake year 2";
 
 
-    //delete database file first!
     public void addEvent() throws Exception {
         Event e = new Event(eventID, descendant, person, latitude, longitude, country, city, eventType, year);
         eventDAO.addEvent(e);
@@ -141,6 +141,7 @@ public class EventDAOTest {
     public void delete() throws Exception
     {
         createTable();
+        clear();
         addEvent();
         eventDAO.delete(descendant);
         Event e = eventDAO.getEvent(eventID);

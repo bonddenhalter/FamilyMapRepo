@@ -32,10 +32,13 @@ import server.results.RegisterResult;
 
 public class Facade {
 
-    AuthDAO authDAO;
-    EventDAO eventDAO;
-    PersonDAO personDAO;
-    UserDAO userDAO;
+    private AuthDAO authDAO;
+    private EventDAO eventDAO;
+    private PersonDAO personDAO;
+    private UserDAO userDAO;
+
+    private int numPeopleAdded = 0;
+    private int numEventsAdded = 0;
 
     public Facade()
     {
@@ -132,36 +135,19 @@ public class Facade {
         return result;
     }
 
-    private String generatePersonID()
+    private String generateRandomID()
     {
         return UUID.randomUUID().toString();
     }
 
-   /* private String getRandomGender()
-    {
-        Random rand = new Random();
-        int val = rand.nextInt(1); //get a 0 or 1
-        if (val == 0)
-            return "Male";
-        else if (val == 1)
-            return "Female";
-        else
-        {
-            System.out.println("Random Gender ERROR");
-            return null;
-        }
-
-
-    }*/ //this doesn't sense to have this
-
     //recursive function to fill in person data
     //adds ancestors to the database
     //if generations is > 0, the user will not be added to the databse
-    private Person generatePersonData(String descendant, int generations, String gender) throws SQLException
+    private Person generatePersonData(String descendant, int generations, String gender, int marriageYear) throws SQLException
     {
-        String personID = generatePersonID();//call generatePersonID();
+        String personID = generateRandomID();//call generateRandomID();
         //descendant is the user
-        RandomNames randNames = new RandomNames();
+        RandomNames randNames = RandomNames.getInstance();
         //pull names from the given file
         String firstName = (gender.equals("Male")) ? randNames.getRandomMaleName() : randNames.getRandomFemaleName();
         String lastName = randNames.getRandomLastName();
@@ -170,10 +156,28 @@ public class Facade {
         String mother = "";
         String spouse = "";
 
+        //add current person's birth event
+        Event currentPersonBirth = generateEvent(descendant, personID, marriageYear - 20 , "Birth");
+        eventDAO.addEvent(currentPersonBirth); //add user's birth event
+        numEventsAdded++;
+
+        //if they are really old, add a death event
+        if (Integer.parseInt(currentPersonBirth.getYear()) < 1940)
+        {
+            int deathYear = genRandYear(marriageYear + 60);
+            if (deathYear > 2017)
+                deathYear = genRandYear(2017);
+            if (deathYear < marriageYear)
+                deathYear = (marriageYear + 2017) / 2;
+            eventDAO.addEvent(generateEvent(descendant, personID, deathYear, "Death"));
+            numEventsAdded++;
+        }
+
         if (generations > 0)
         {
-            Person dad = generatePersonData(descendant, generations - 1, "Male"); //call function to get father
-            Person mom = generatePersonData(descendant, generations - 1, "Female"); //call function to get mother
+            int parentsMarriageYear = Integer.parseInt(currentPersonBirth.getYear());
+            Person dad = generatePersonData(descendant, generations - 1, "Male", parentsMarriageYear); //call function to get father
+            Person mom = generatePersonData(descendant, generations - 1, "Female", parentsMarriageYear); //call function to get mother
 
             //set father and mother as spouses for each other
             dad.setSpouse(mom.getPersonID());
@@ -184,7 +188,18 @@ public class Facade {
             mother = mom.getPersonID();
 
             personDAO.addPerson(dad);
+            numPeopleAdded++;
             personDAO.addPerson(mom);
+            numPeopleAdded++;
+
+            //add marriage events for parents
+            Event dadMarriage = generateEvent(descendant, dad.getPersonID(), parentsMarriageYear, "Marriage");
+            //mom's should be the same as Dad's except for person ID
+            Event momMarriage = new Event(generateRandomID(), dadMarriage.getDescendant(), mom.getPersonID(), dadMarriage.getLatitude(), dadMarriage.getLongitude(), dadMarriage.getCountry(), dadMarriage.getCity(), dadMarriage.getEventType(), dadMarriage.getYear());
+            eventDAO.addEvent(dadMarriage);
+            numEventsAdded++;
+            eventDAO.addEvent(momMarriage);
+            numEventsAdded++;
         }
 
         Person me = new Person(personID, descendant, firstName, lastName, gender, father, mother, spouse);
@@ -193,6 +208,23 @@ public class Facade {
         //    personDAO.addPerson(me); //add self to database
 
         return me; //return new person
+    }
+
+    //returns a random year that is between the base year and 20 years previous
+    private int genRandYear(int baseYear)
+    {
+        Random rand = new Random();
+        int randOffset = rand.nextInt(21);
+        return baseYear - randOffset;
+    }
+
+    private Event generateEvent(String descendant, String personID, int baseYear, String eventType)
+    {
+        String eventID = generateRandomID();
+        RandomNames randomNames = RandomNames.getInstance();
+        RandomNames.Location l = randomNames.getRandomLocation();
+        String year = Integer.toString(genRandYear(baseYear));
+        return new Event(eventID, descendant, personID, l.getLatitude(), l.getLongitude(), l.getCountry(), l.getCity(), eventType, year);
     }
 
     /**
@@ -205,6 +237,8 @@ public class Facade {
      */
     public FillResult fill(String username, int generations)
     {
+        numPeopleAdded = 0;
+        numEventsAdded = 0;
 
         try {
             if (generations < 0)
@@ -233,10 +267,17 @@ public class Facade {
             user.setFather("");
             user.setMother("");
             user.setDescendant(username);
-           if (generations > 0) //create ancestors and add them to database
+
+            //add user's birth event
+            Event userBirth = generateEvent(username, user.getPersonID(), 2000, "Birth");
+            eventDAO.addEvent(userBirth); //add user's birth event
+            numEventsAdded++;
+
+            if (generations > 0) //create ancestors and add them to database
            {
-               Person dad = generatePersonData(username, generations - 1, "Male"); //call function to get father
-               Person mom = generatePersonData(username, generations - 1, "Female"); //call function to get mother
+               int parentsMarriageYear = Integer.parseInt(userBirth.getYear());
+               Person dad = generatePersonData(username, generations - 1, "Male", parentsMarriageYear); //call function to get father
+               Person mom = generatePersonData(username, generations - 1, "Female", parentsMarriageYear); //call function to get mother
 
                //set father and mother as spouses for each other
                dad.setSpouse(mom.getPersonID());
@@ -244,16 +285,25 @@ public class Facade {
 
                //add father and mother to database
                personDAO.addPerson(dad);
+               numPeopleAdded++;
                personDAO.addPerson(mom);
+               numPeopleAdded++;
 
                //set strings for father and mother
                user.setFather(dad.getPersonID());
                user.setMother(mom.getPersonID());
 
+               //add marriage events for parents
+               Event dadMarriage = generateEvent(username, dad.getPersonID(), parentsMarriageYear, "Marriage");
+               //mom's should be the same as Dad's except for person ID
+               Event momMarriage = new Event(generateRandomID(), dadMarriage.getDescendant(), mom.getPersonID(), dadMarriage.getLatitude(), dadMarriage.getLongitude(), dadMarriage.getCountry(), dadMarriage.getCity(), dadMarriage.getEventType(), dadMarriage.getYear());
+               eventDAO.addEvent(dadMarriage);
+               numEventsAdded++;
+               eventDAO.addEvent(momMarriage);
+               numEventsAdded++;
            }
             personDAO.addPerson(user); //add user to the persons database
-
-            //I SUCCESSFULLY ADDED PEOPLE; NOW I NEED TO ADD EVENTS. I ALSO NEED TO CHANGE THE SUCCESS MESSAGE
+            numPeopleAdded++;
 
         }
         catch (SQLException ex)
@@ -268,7 +318,11 @@ public class Facade {
         {
             return new FillResult(reg.getMessage());
         }
-        return new FillResult(FillResult.successMessage); //if all goes well
+
+        //if all goes well, return success message
+        FillResult fillResult= new FillResult("");
+        fillResult.setSuccessMessage(numPeopleAdded, numEventsAdded);
+        return fillResult;
     }
 
     //generations is optional
@@ -285,7 +339,41 @@ public class Facade {
      */
     public LoadResult load(LoadRequest r)
     {
-        return null;
+        LoadResult result = new LoadResult();
+        try
+        {
+            int numUsersAdded = 0;
+            int numEventsAdded = 0;
+            int numPeopleAdded = 0;
+
+            clear(); //clear the database
+            for (User u : r.getUsers())
+            {
+                userDAO.addUser(u);
+                numUsersAdded++;
+            }
+            for (Person p : r.getPersons())
+            {
+                personDAO.addPerson(p);
+                numPeopleAdded++;
+            }
+            for (Event e : r.getEvents())
+            {
+                eventDAO.addEvent(e);
+                numEventsAdded++;
+            }
+
+            result.setSuccessMessage(numUsersAdded, numPeopleAdded, numEventsAdded);
+        }
+        catch (SQLException ex)
+        {
+            result.setMessage(LoadResult.SQLFailureMessage);
+        }
+        catch (NullPointerException nex)
+        {
+            result.setMessage(LoadResult.NullFailureMessage);
+        }
+        return result;
     }
 
     /**
@@ -295,7 +383,36 @@ public class Facade {
      */
     public LoginResult login(LoginRequest r)
     {
-        return null;
+        LoginResult result;
+        try
+        {
+            User u = userDAO.getUser(r.getUsername());
+            if (u == null) {
+                result = new LoginResult(null, null, null);
+                result.setErrorMessage(LoginResult.userDoesNotExistMsg);
+            }
+            else
+            {
+                if (r.getPassword().equals(u.getPassword()))  //verify correct password
+                {
+                    String authToken = generateRandomID();
+                    int loginTimeInSeconds = (int) (System.currentTimeMillis() / 1000);
+                    authDAO.addAuth(new Auth(authToken, u.getUsername(), loginTimeInSeconds));
+                    result = new LoginResult(authToken, u.getUsername(), u.getPersonID());
+                }
+                else
+                {
+                    result = new LoginResult(null, null, null);
+                    result.setErrorMessage(LoginResult.incorrectPasswordMsg);
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            result = new LoginResult(null, null, null);
+            result.setErrorMessage(LoginResult.SQLFailureMsg);
+        }
+        return result;
     }
 
     /**

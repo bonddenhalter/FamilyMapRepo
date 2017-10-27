@@ -13,12 +13,17 @@ import server.dataAccess.PersonDAO;
 import server.dataAccess.PersonDAOTest;
 import server.dataAccess.UserDAO;
 import server.dataAccess.UserDAOTest;
+import server.models.Event;
 import server.models.Person;
 import server.models.User;
+import server.requests.LoadRequest;
+import server.requests.LoginRequest;
 import server.results.ClearResult;
 import server.results.EventResult;
 import server.results.EventsResult;
 import server.results.FillResult;
+import server.results.LoadResult;
+import server.results.LoginResult;
 
 import static org.junit.Assert.*;
 import static server.dataAccess.EventDAOTest.city;
@@ -195,15 +200,17 @@ public class FacadeTest {
     {
         PersonDAOTest personDAOTest = new PersonDAOTest();
         personDAOTest.setUp();
-        //personDAOTest.createTable();
         personDAOTest.clear();
 
         UserDAOTest userDAOTest = new UserDAOTest();
         userDAOTest.setUp();
-        //userDAOTest.createTable();
         userDAOTest.clear();
         userDAOTest.addUser(); //register a user
         String username = UserDAOTest.username; //use the username from UserDAOTest
+
+        EventDAOTest eventDAOTest = new EventDAOTest();
+        eventDAOTest.setUp();
+        eventDAOTest.clear();
 
         //try a negative generation
         FillResult result = facade.fill(username, -1);
@@ -216,7 +223,11 @@ public class FacadeTest {
         //give valid inputs
         //try with generations = 0
         result = facade.fill(username, 0);
-        assertEquals(result.getMessage(), FillResult.successMessage);
+        System.out.println("Result message: " + result.getMessage());
+        assertNotNull(result.getMessage());
+        assertNotEquals(result.getMessage(), FillResult.negativeGenMessage);
+        assertNotEquals(result.getMessage(), FillResult.SQLFailureMessage);
+        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);
         //user should be in database with no father, mother or spouse
         PersonDAO personDAO = new PersonDAO();
         List<Person> people = personDAO.getPeople(username);
@@ -227,29 +238,147 @@ public class FacadeTest {
             //try with generations blank
                 //check that 4 generations exist
         personDAOTest.clear();
+        eventDAOTest.clear();
         result = facade.fill(username);
-        assertEquals(result.getMessage(), FillResult.successMessage);
-        UserDAO userDAO = new UserDAO();
+
+        System.out.println("Result message: " + result.getMessage());
+        assertNotNull(result.getMessage());
+        assertNotEquals(result.getMessage(), FillResult.negativeGenMessage);
+        assertNotEquals(result.getMessage(), FillResult.SQLFailureMessage);
+        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);        UserDAO userDAO = new UserDAO();
         Person user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
         checkTree(user, username, 4, personDAO, true);
 
-            //try with generations > 0
+        //there should have been at least 31 birth events and 15 marriage events created
+        EventDAO eventDAO = new EventDAO();
+        List<Event> events =  eventDAO.getEvents(username);
+        System.out.println("Events created: " + events.size());
+        assertTrue(events.size() >= 46);
+
+            //try with generations == 3
                 //check that generations exist
-        personDAO.clear();
+        personDAOTest.clear();
+        eventDAOTest.clear();
         result = facade.fill(username, 3);
-        assertEquals(result.getMessage(), FillResult.successMessage);
-        user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
+        System.out.println("Result message: " + result.getMessage());
+        assertNotNull(result.getMessage());
+        assertNotEquals(result.getMessage(), FillResult.negativeGenMessage);
+        assertNotEquals(result.getMessage(), FillResult.SQLFailureMessage);
+        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);        user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
         checkTree(user, username, 3, personDAO, true);
+
+        //there should have been at least 15 birth events and 7 marriages
+        events =  eventDAO.getEvents(username);
+        System.out.println("Events created: " + events.size());
+        assertTrue(events.size() >= 22);
+
     }
 
     @Test
-    public void load() throws Exception {
+    public void load() throws Exception
+    {
+        //set up DAOs
+        PersonDAOTest personDAOTest = new PersonDAOTest();
+        personDAOTest.setUp();
+        personDAOTest.clear();
 
+        UserDAOTest userDAOTest = new UserDAOTest();
+        userDAOTest.setUp();
+        userDAOTest.clear();
+
+        EventDAOTest eventDAOTest = new EventDAOTest();
+        eventDAOTest.setUp();
+        eventDAOTest.clear();
+
+        //load null arrays
+        LoadRequest req = new LoadRequest(null, null, null);
+        LoadResult res = facade.load(req);
+        assertEquals(res.getMessage(), LoadResult.NullFailureMessage);
+
+        //load empty arrays
+        req = new LoadRequest(new User[0], new Person[0], new Event[0]);
+        res = facade.load(req);
+        assertEquals(res.getMessage(), "Successfully added " + 0 + " users, " + 0 + " persons, and " + 0 + " events to the database.");
+
+        //load nonempty arrays
+        Person p = new Person(PersonDAOTest.personID, PersonDAOTest.descendant, PersonDAOTest.firstName, PersonDAOTest.lastName, PersonDAOTest.gender, PersonDAOTest.father, PersonDAOTest.mother, PersonDAOTest.spouse);
+        Event e = new Event(EventDAOTest.eventID, EventDAOTest.descendant, EventDAOTest.person, EventDAOTest.latitude, EventDAOTest.longitude, EventDAOTest.country, EventDAOTest.city, EventDAOTest.eventType, EventDAOTest.year);
+        User u = new User(UserDAOTest.username, UserDAOTest.password, UserDAOTest.email, UserDAOTest.firstName, UserDAOTest.lastName, UserDAOTest.gender, UserDAOTest.personID);
+
+        Person[] pArray = {p};
+        Event[] eArray = {e};
+        User[] uArray = {u};
+
+        LoadRequest newReq = new LoadRequest(uArray, pArray, eArray);
+        res = facade.load(newReq);
+
+        assertEquals(res.getMessage(), "Successfully added " + 1 + " users, " + 1 + " persons, and " + 1 + " events to the database.");
+
+        //Load clears the database before loading, so adding the same arrays again should not result in an exception
+        res = facade.load(newReq);
+        assertNotEquals(res.getMessage(), LoadResult.SQLFailureMessage);
+        userDAOTest.getUser();
+        personDAOTest.getPerson();
+        eventDAOTest.getEvent();
+
+        //now if we load in empty arrays and query the database we shouldn't get anything
+        res = facade.load(req);
+        UserDAO userDAO = new UserDAO();
+        EventDAO eventDAO = new EventDAO();
+        PersonDAO personDAO = new PersonDAO();
+        assertNull(userDAO.getUser(UserDAOTest.username));
+        assertNull(eventDAO.getEvent(EventDAOTest.eventID));
+        assertNull(personDAO.getPerson(PersonDAOTest.personID));
     }
 
     @Test
-    public void login() throws Exception {
+    public void login() throws Exception
+    {
+        //test username that doesn't exist
+        UserDAOTest userDAOTest = new UserDAOTest();
+        userDAOTest.setUp();
+        userDAOTest.createTable();
+        userDAOTest.clear();
+        userDAOTest.addUser();
 
+        LoginRequest req = new LoginRequest("nonexistant username", "whatever password");
+        LoginResult result = facade.login(req);
+        assertNotNull(result);
+        assertNull(result.getAuthToken());
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertEquals(result.getErrorMessage(), LoginResult.userDoesNotExistMsg);
+
+        //test correct username with incorrect password
+        req.setUsername(UserDAOTest.username);
+        result = facade.login(req);
+        assertNotNull(result);
+        assertNull(result.getAuthToken());
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertEquals(result.getErrorMessage(), LoginResult.userDoesNotExistMsg);
+
+        //test correct username and password
+        req.setPassword(UserDAOTest.password);
+        result = facade.login(req);
+        assertNotNull(result);
+        assertNotNull(result.getAuthToken());
+        assertEquals(result.getPersonID(), UserDAOTest.personID);
+        assertEquals(result.getUserName(), UserDAOTest.username);
+        String authToken1 = result.getAuthToken();
+        String personID1 = result.getPersonID();
+        String userName1 = result.getUserName();
+
+        //test again; should log in multiple times with different auth tokens
+        result = facade.login(req);
+        assertNotNull(result);
+        assertNotNull(result.getAuthToken());
+        assertEquals(result.getPersonID(), UserDAOTest.personID);
+        assertEquals(result.getUserName(), UserDAOTest.username);
+
+        assertNotEquals(authToken1, result.getAuthToken()); //should be a different auth token
+        assertEquals(personID1, result.getPersonID());
+        assertEquals(userName1, result.getUserName());
     }
 
     @Test

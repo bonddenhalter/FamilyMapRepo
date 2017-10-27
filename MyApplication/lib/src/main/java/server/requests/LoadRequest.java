@@ -11,31 +11,37 @@ import server.models.*;
 
 public class LoadRequest {
 
-    private Arrays users;
-    private Arrays persons;
-    private Arrays events;
+    private User[] users;
+    private Person[] persons;
+    private Event[] events;
 
-    public Arrays getUsers() {
+    public LoadRequest(User[] users, Person[] persons, Event[] events) {
+        this.users = users;
+        this.persons = persons;
+        this.events = events;
+    }
+
+    public User[] getUsers() {
         return users;
     }
 
-    public void setUsers(Arrays users) {
+    public void setUsers(User[] users) {
         this.users = users;
     }
 
-    public Arrays getPersons() {
+    public Person[] getPersons() {
         return persons;
     }
 
-    public void setPersons(Arrays persons) {
+    public void setPersons(Person[] persons) {
         this.persons = persons;
     }
 
-    public Arrays getEvents() {
+    public Event[] getEvents() {
         return events;
     }
 
-    public void setEvents(Arrays events) {
+    public void setEvents(Event[] events) {
         this.events = events;
     }
 

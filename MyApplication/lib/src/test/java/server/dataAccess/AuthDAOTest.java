@@ -31,6 +31,7 @@ public class AuthDAOTest {
     public void testAuthDAO() throws Exception
     {
         createTable();
+        clear();
         addAuth();
         getAuth();
         clear();
@@ -65,6 +66,7 @@ public class AuthDAOTest {
     public void delete() throws Exception
     {
         createTable();
+        clear();
         addAuth();
         authDAO.delete(testUsername);
         Auth a = authDAO.getAuth(testUsername);

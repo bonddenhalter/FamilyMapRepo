@@ -33,6 +33,7 @@ public class PersonDAOTest {
     public void testPersonDAO() throws Exception
     {
         createTable();
+        clear();
         addPerson();
         getPerson();
         addPerson2();
@@ -45,22 +46,22 @@ public class PersonDAOTest {
         personDAO.createTable();
     }
 
-    private String personID = "fake person id";
-    private String descendant = "fake descendant";
-    private String firstName = "fake first name";
-    private String lastName = "fake last name";
-    private String gender = "fake gender";
-    private String father = "fake father";
-    private String mother = "fake mother";
-    private String spouse = "fake spouse";
+    public static String personID = "fake person id";
+    public static String descendant = "fake descendant";
+    public static String firstName = "fake first name";
+    public static String lastName = "fake last name";
+    public static String gender = "fake gender";
+    public static String father = "fake father";
+    public static String mother = "fake mother";
+    public static String spouse = "fake spouse";
 
-    private String personID2 = "fake person id 2";
-    private String firstName2 = "fake first name 2";
-    private String lastName2 = "fake last name 2";
-    private String gender2 = "fake gender 2";
-    private String father2 = "fake father 2";
-    private String mother2 = "fake mother 2";
-    private String spouse2 = "fake spouse 2";
+    public static String personID2 = "fake person id 2";
+    public static String firstName2 = "fake first name 2";
+    public static String lastName2 = "fake last name 2";
+    public static String gender2 = "fake gender 2";
+    public static String father2 = "fake father 2";
+    public static String mother2 = "fake mother 2";
+    public static String spouse2 = "fake spouse 2";
 
 
     public void addPerson() throws Exception {
@@ -134,6 +135,7 @@ public class PersonDAOTest {
     public void delete() throws Exception
     {
         createTable();
+        clear();
         addPerson();
         personDAO.delete(descendant);
         Person p = personDAO.getPerson(personID);

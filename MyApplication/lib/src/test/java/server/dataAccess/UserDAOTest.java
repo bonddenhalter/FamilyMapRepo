@@ -29,6 +29,7 @@ public class UserDAOTest {
     public void testUserDAO() throws Exception
     {
         createTable();
+        clear();
         addUser();
         getUser();
         clear();
@@ -40,12 +41,12 @@ public class UserDAOTest {
     }
 
     public static String username = "fake username";
-    String password = "fake password";
-    String email = "fake email";
-    String firstName = "fake first name";
-    String lastName = "fake last name";
-    String gender = "fake gender";
-    String personID = "fake person ID";
+    public static String password = "fake password";
+    public static String email = "fake email";
+    public static String firstName = "fake first name";
+    public static String lastName = "fake last name";
+    public static String gender = "fake gender";
+    public static String personID = "fake person ID";
 
     public void addUser() throws Exception {
         User u = new User(username, password, email, firstName, lastName, gender, personID);
@@ -68,6 +69,7 @@ public class UserDAOTest {
     public void delete() throws Exception
     {
         createTable();
+        clear();
         addUser();
         userDAO.delete(username);
         User u = userDAO.getUser(username);

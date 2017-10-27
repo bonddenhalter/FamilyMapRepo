@@ -2,6 +2,8 @@ package server.results;
 
 /**
  * Contains the information that is returned from a login request
+ * If there is an error, authToken, userName, and personID will be null, and errorMessage will contain a message.
+ * If error, authToken, and userName are not null, there was not an error
  */
 
 public class LoginResult {
@@ -9,6 +11,16 @@ public class LoginResult {
     private String authToken;
     private String userName;
     private String personID;
+    private String errorMessage;
+    public static String userDoesNotExistMsg = "Login Error: The username does not exist.";
+    public static String incorrectPasswordMsg = "Login Error: Incorrect Password.";
+    public static String SQLFailureMsg = "Login Error: a SQL error occured.";
+
+    public LoginResult(String authToken, String userName, String personID) {
+        this.authToken = authToken;
+        this.userName = userName;
+        this.personID = personID;
+    }
 
     public String getAuthToken() {
         return authToken;
@@ -32,6 +44,14 @@ public class LoginResult {
 
     public void setPersonID(String personID) {
         this.personID = personID;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
 }

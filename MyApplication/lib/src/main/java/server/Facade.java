@@ -376,6 +376,11 @@ public class Facade {
         return result;
     }
 
+    private int getTimeInSeconds()
+    {
+        return (int) (System.currentTimeMillis() / 1000);
+    }
+
     /**
      * Logs in the user and returns an auth token.
      * @param r the LoginRequest object
@@ -396,7 +401,7 @@ public class Facade {
                 if (r.getPassword().equals(u.getPassword()))  //verify correct password
                 {
                     String authToken = generateRandomID();
-                    int loginTimeInSeconds = (int) (System.currentTimeMillis() / 1000);
+                    int loginTimeInSeconds = getTimeInSeconds();
                     authDAO.addAuth(new Auth(authToken, u.getUsername(), loginTimeInSeconds));
                     result = new LoginResult(authToken, u.getUsername(), u.getPersonID());
                 }
@@ -423,18 +428,89 @@ public class Facade {
      */
     public PeopleResult people(String token)
     {
-        return null;
+        PeopleResult result;
+        try
+        {
+            Auth a = authDAO.getAuth(token);
+            if (a == null) //if the auth token doesn't exist
+            {
+                result = new PeopleResult(null);
+                result.setErrorMsg(PeopleResult.invalidAuthTokenMsg);
+            }
+            else //valid result
+            {
+                List<Person> relativeList = personDAO.getPeople(a.getUsername());
+                result = new PeopleResult(relativeList.toArray(new Person[0]));
+            }
+
+        }
+        catch (SQLException ex)
+        {
+            result = new PeopleResult(null);
+            result.setErrorMsg(PeopleResult.SQLFailureMsg);
+        }
+        return result;
     }
 
     /**
-     * Returns the single Person object with the specified ID.
+     * Returns the single Person object with the specified ID, so long as it belongs to the user
      * @param personID the personID of the person you want
-     * @param Token the authToken of the person you want
+     * @param token the authToken of the user
      * @return the person with the specified ID. Null if there's an error.
      */
-    public PersonResult person(String personID, String Token)
+    public PersonResult person(String personID, String token)
     {
-        return null;
+        PersonResult result;
+        try
+        {
+            Auth a = authDAO.getAuth(token);
+            if (a == null) //if the auth doesn't exist
+            {
+                result = new PersonResult(null);
+                result.setErrorMsg(PersonResult.invalidTokenMsg);
+                return result;
+            }
+
+            String username = a.getUsername();
+            Person p = personDAO.getPerson(personID);
+            if (p == null) //if there is no person with the given personID
+            {
+                result = new PersonResult(null);
+                result.setErrorMsg(PersonResult.invalidPersonIDMsg);
+                return result;
+            }
+
+            if (!p.getDescendant().equals(username)) //if the descendant doesn't match the user, it doesn't belong to them
+            {
+                result = new PersonResult(null);
+                result.setErrorMsg(PersonResult.userPermissiongMsg);
+                return result;
+            }
+
+            result = new PersonResult(p);
+            return result;
+        }
+        catch (SQLException ex)
+        {
+            result = new PersonResult(null);
+            result.setErrorMsg(PersonResult.SQLFailureMsg);
+            return result;
+        }
+    }
+
+    private boolean isRequestValid(RegisterRequest r)
+    {
+        boolean valid = true;
+        if (r.getPassword() == null || r.getEmail() == null || r.getFirstName() == null || r.getGender() == null ||
+                r.getLastName() == null || r.getGender() == null)
+        {
+            valid = false;
+        }
+        if (r.getGender() != "Male" && r.getGender() != "Female")
+            valid = false;
+
+        //NEED TO CHECK VALID EMAIL, VALID USERNAME, VALID PASSWORD, OR ANYTHING ELSE?
+        return valid;
     }
 
     /**
@@ -445,6 +521,60 @@ public class Facade {
      */
     public RegisterResult register(RegisterRequest r)
     {
-        return null;
+        RegisterResult result;
+        try
+        {
+            //make sure the request is complete
+            if (!isRequestValid(r))
+            {
+                result = new RegisterResult(null, null, null);
+                result.setErrorMsg(RegisterResult.requestErrorMsg);
+                return result;
+            }
+
+            //make sure the username is not taken
+            if (userDAO.getUser(r.getUserName()) != null)
+            {
+                result = new RegisterResult(null, null, null);
+                result.setErrorMsg(RegisterResult.usernameTakenMsg);
+                return result;
+            }
+
+            //create new user account
+            String newPersonID = generateRandomID();
+            User u = new User(r.getUserName(), r.getPassword(), r.getEmail(), r.getFirstName(), r.getLastName(), r.getGender(), newPersonID);
+            userDAO.addUser(u);
+
+            //generate 4 generations of ancestor data
+            FillResult fillResult = fill(r.getUserName(), 4);
+            //check for errors
+            if (fillResult.getMessage().equals(FillResult.negativeGenMessage) || fillResult.getMessage().equals(FillResult.SQLFailureMessage) || fillResult.getMessage().equals(FillResult.unregisteredUserMessage))
+            {
+                result = new RegisterResult(null, null, null);
+                result.setErrorMsg(fillResult.getMessage());
+                return result;
+            }
+
+            //log user in
+            LoginResult loginResult = login(new LoginRequest(r.getUserName(), r.getPassword()));
+            //check for erros
+            if (loginResult.getAuthToken() == null) //if any data points are null, there was a failure
+            {
+                result = new RegisterResult(null, null, null);
+                result.setErrorMsg(loginResult.getErrorMessage());
+                return result;
+            }
+
+            //success
+            //return auth token
+            result = new RegisterResult(loginResult.getAuthToken(), loginResult.getUserName(), newPersonID);
+            return result;
+        }
+        catch (SQLException ex)
+        {
+            result = new RegisterResult(null, null, null);
+            result.setErrorMsg(RegisterResult.SQLFailureMsg);
+            return result;
+        }
     }
 }

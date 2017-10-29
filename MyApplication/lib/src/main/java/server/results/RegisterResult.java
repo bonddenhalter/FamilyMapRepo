@@ -10,6 +10,19 @@ public class RegisterResult {
     private String userName;
     private String personID;
 
+    private String errorMsg;
+
+    public static String SQLFailureMsg = "There was a SQL error when processing the REGISTER request.";
+    public static String usernameTakenMsg = "Error: the username is already taken by another user.";
+    public static String requestErrorMsg = "Error: the request has a missing or invalid value.";
+
+
+    public RegisterResult(String authToken, String userName, String personID) {
+        this.authToken = authToken;
+        this.userName = userName;
+        this.personID = personID;
+    }
+
     public String getAuthToken() {
         return authToken;
     }
@@ -32,6 +45,14 @@ public class RegisterResult {
 
     public void setPersonID(String personID) {
         this.personID = personID;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 
 

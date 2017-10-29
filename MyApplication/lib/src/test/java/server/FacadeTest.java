@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import server.dataAccess.AuthDAO;
 import server.dataAccess.AuthDAOTest;
 import server.dataAccess.EventDAO;
 import server.dataAccess.EventDAOTest;
@@ -13,17 +14,22 @@ import server.dataAccess.PersonDAO;
 import server.dataAccess.PersonDAOTest;
 import server.dataAccess.UserDAO;
 import server.dataAccess.UserDAOTest;
+import server.models.Auth;
 import server.models.Event;
 import server.models.Person;
 import server.models.User;
 import server.requests.LoadRequest;
 import server.requests.LoginRequest;
+import server.requests.RegisterRequest;
 import server.results.ClearResult;
 import server.results.EventResult;
 import server.results.EventsResult;
 import server.results.FillResult;
 import server.results.LoadResult;
 import server.results.LoginResult;
+import server.results.PeopleResult;
+import server.results.PersonResult;
+import server.results.RegisterResult;
 
 import static org.junit.Assert.*;
 import static server.dataAccess.EventDAOTest.city;
@@ -43,6 +49,23 @@ import static server.dataAccess.EventDAOTest.person;
 import static server.dataAccess.EventDAOTest.person2;
 import static server.dataAccess.EventDAOTest.year;
 import static server.dataAccess.EventDAOTest.year2;
+import static server.dataAccess.PersonDAOTest.father;
+import static server.dataAccess.PersonDAOTest.father2;
+import static server.dataAccess.PersonDAOTest.firstName;
+import static server.dataAccess.PersonDAOTest.firstName2;
+import static server.dataAccess.PersonDAOTest.gender;
+import static server.dataAccess.PersonDAOTest.gender2;
+import static server.dataAccess.PersonDAOTest.lastName;
+import static server.dataAccess.PersonDAOTest.lastName2;
+import static server.dataAccess.PersonDAOTest.mother;
+import static server.dataAccess.PersonDAOTest.mother2;
+import static server.dataAccess.PersonDAOTest.personID;
+import static server.dataAccess.PersonDAOTest.personID2;
+import static server.dataAccess.PersonDAOTest.spouse;
+import static server.dataAccess.PersonDAOTest.spouse2;
+import static server.dataAccess.UserDAOTest.email;
+import static server.dataAccess.UserDAOTest.password;
+import static server.dataAccess.UserDAOTest.username;
 
 /**
  * Created by bondd on 10/23/2017.
@@ -301,9 +324,9 @@ public class FacadeTest {
         assertEquals(res.getMessage(), "Successfully added " + 0 + " users, " + 0 + " persons, and " + 0 + " events to the database.");
 
         //load nonempty arrays
-        Person p = new Person(PersonDAOTest.personID, PersonDAOTest.descendant, PersonDAOTest.firstName, PersonDAOTest.lastName, PersonDAOTest.gender, PersonDAOTest.father, PersonDAOTest.mother, PersonDAOTest.spouse);
+        Person p = new Person(personID, PersonDAOTest.descendant, firstName, lastName, gender, father, mother, spouse);
         Event e = new Event(EventDAOTest.eventID, EventDAOTest.descendant, EventDAOTest.person, EventDAOTest.latitude, EventDAOTest.longitude, EventDAOTest.country, EventDAOTest.city, EventDAOTest.eventType, EventDAOTest.year);
-        User u = new User(UserDAOTest.username, UserDAOTest.password, UserDAOTest.email, UserDAOTest.firstName, UserDAOTest.lastName, UserDAOTest.gender, UserDAOTest.personID);
+        User u = new User(username, password, email, UserDAOTest.firstName, UserDAOTest.lastName, UserDAOTest.gender, UserDAOTest.personID);
 
         Person[] pArray = {p};
         Event[] eArray = {e};
@@ -326,21 +349,21 @@ public class FacadeTest {
         UserDAO userDAO = new UserDAO();
         EventDAO eventDAO = new EventDAO();
         PersonDAO personDAO = new PersonDAO();
-        assertNull(userDAO.getUser(UserDAOTest.username));
+        assertNull(userDAO.getUser(username));
         assertNull(eventDAO.getEvent(EventDAOTest.eventID));
-        assertNull(personDAO.getPerson(PersonDAOTest.personID));
+        assertNull(personDAO.getPerson(personID));
     }
 
     @Test
     public void login() throws Exception
     {
-        //test username that doesn't exist
         UserDAOTest userDAOTest = new UserDAOTest();
         userDAOTest.setUp();
         userDAOTest.createTable();
         userDAOTest.clear();
         userDAOTest.addUser();
 
+        //test username that doesn't exist
         LoginRequest req = new LoginRequest("nonexistant username", "whatever password");
         LoginResult result = facade.login(req);
         assertNotNull(result);
@@ -350,21 +373,21 @@ public class FacadeTest {
         assertEquals(result.getErrorMessage(), LoginResult.userDoesNotExistMsg);
 
         //test correct username with incorrect password
-        req.setUsername(UserDAOTest.username);
+        req.setUsername(username);
         result = facade.login(req);
         assertNotNull(result);
         assertNull(result.getAuthToken());
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
-        assertEquals(result.getErrorMessage(), LoginResult.userDoesNotExistMsg);
+        assertEquals(result.getErrorMessage(), LoginResult.incorrectPasswordMsg);
 
         //test correct username and password
-        req.setPassword(UserDAOTest.password);
+        req.setPassword(password);
         result = facade.login(req);
         assertNotNull(result);
         assertNotNull(result.getAuthToken());
         assertEquals(result.getPersonID(), UserDAOTest.personID);
-        assertEquals(result.getUserName(), UserDAOTest.username);
+        assertEquals(result.getUserName(), username);
         String authToken1 = result.getAuthToken();
         String personID1 = result.getPersonID();
         String userName1 = result.getUserName();
@@ -374,7 +397,7 @@ public class FacadeTest {
         assertNotNull(result);
         assertNotNull(result.getAuthToken());
         assertEquals(result.getPersonID(), UserDAOTest.personID);
-        assertEquals(result.getUserName(), UserDAOTest.username);
+        assertEquals(result.getUserName(), username);
 
         assertNotEquals(authToken1, result.getAuthToken()); //should be a different auth token
         assertEquals(personID1, result.getPersonID());
@@ -382,18 +405,140 @@ public class FacadeTest {
     }
 
     @Test
-    public void people() throws Exception {
+    public void people() throws Exception
+    {
+        AuthDAOTest authDAOTest = new AuthDAOTest();
+        authDAOTest.setUp();
+        authDAOTest.clear();
+        AuthDAO authDAO = new AuthDAO();
+        Auth testAuth = new Auth(AuthDAOTest.testToken, PersonDAOTest.descendant, 0);
+        authDAO.addAuth(testAuth);
+
+        PersonDAOTest personDAOTest = new PersonDAOTest();
+        personDAOTest.setUp();
+        personDAOTest.clear();
+        personDAOTest.addPerson();
+        personDAOTest.addPerson2();
+
+        PeopleResult result;
+
+        //test nonexistent token
+        result = facade.people("nonexistent auth token");
+        assertNotNull(result);
+        assertNull(result.getData());
+        assertEquals(result.getErrorMsg(), PeopleResult.invalidAuthTokenMsg);
+
+        //test actual existing token
+        result = facade.people(authDAOTest.testToken);
+        assertNotNull(result);
+        Person[] people = new Person[2];
+        Person p1 = new Person(personID, PersonDAOTest.descendant, firstName, lastName, gender, father, mother, spouse);
+        Person p2 = new Person(personID2, PersonDAOTest.descendant, firstName2, lastName2, gender2, father2, mother2, spouse2);
+        people[0] = p1;
+        people[1] = p2;
+        assertEquals(people.length, result.getData().length);
+    }
+
+    @Test
+    public void person() throws Exception
+    {
+        AuthDAOTest authDAOTest = new AuthDAOTest();
+        authDAOTest.setUp();
+        authDAOTest.clear();
+        AuthDAO authDAO = new AuthDAO();
+        Auth testAuth = new Auth("fake token 2", PersonDAOTest.descendant, 0); //this will match a Person
+        authDAO.addAuth(testAuth);
+        authDAOTest.addAuth(); //this one won't match a Person. Contains "fakeToken" and "fakeUsername"
+
+        PersonDAOTest personDAOTest = new PersonDAOTest();
+        personDAOTest.setUp();
+        personDAOTest.clear();
+        personDAOTest.addPerson();
+
+//        UserDAOTest userDAOTest = new UserDAOTest();
+//        userDAOTest.setUp();
+//        userDAOTest.createTable();
+//        userDAOTest.clear();
+//        UserDAO userDAO = new UserDAO();
+//        User u = new User(PersonDAOTest.descendant, password, email, firstName, lastName, gender, personID);
+//        userDAO.addUser(u);
+
+        //test an incorrect auth token
+        PersonResult result = facade.person(PersonDAOTest.personID, "nonexistent token");
+        assertNotNull(result);
+        assertNotNull(result.getErrorMsg());
+        assertEquals(result.getErrorMsg(), PersonResult.invalidTokenMsg);
+
+        //test incorrect personID
+        result = facade.person("nonexistent personID", "fake token 2");
+        assertNotNull(result);
+        assertNotNull(result.getErrorMsg());
+        assertEquals(result.getErrorMsg(), PersonResult.invalidPersonIDMsg);
+
+        //test finding a person that doesn't match the user
+        result = facade.person(PersonDAOTest.personID, AuthDAOTest.testToken);
+        assertNotNull(result);
+        assertNotNull(result.getErrorMsg());
+        assertEquals(result.getErrorMsg(), PersonResult.userPermissiongMsg);
+
+        //test a correct result
+        result = facade.person(PersonDAOTest.personID, "fake token 2");
+        assertNotNull(result);
+        assertNotNull(result.getPersonID());
+        assertNotNull(result.getFirstName());
+        assertNotNull(result.getLastName());
+        assertNotNull(result.getGender());
+
 
     }
 
     @Test
-    public void person() throws Exception {
+    public void register() throws Exception //I'm not going to test the other methods here, only possible errors specific to register()
+    {
+        RegisterRequest request = new RegisterRequest(username, password, email, firstName, lastName, gender);
 
-    }
+        //try a null value
+        request.setEmail(null);
+        RegisterResult result = facade.register(request);
+        assertNotNull(result);
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertNull(result.getAuthToken());
+        assertEquals(result.getErrorMsg(), RegisterResult.requestErrorMsg);
 
-    @Test
-    public void register() throws Exception {
+        //try an invalid gender
+        result = null;
+        request.setEmail(email);
+        request.setGender("Penguin");
+        result = facade.register(request);
+        assertNotNull(result);
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertNull(result.getAuthToken());
+        assertEquals(result.getErrorMsg(), RegisterResult.requestErrorMsg);
 
+        //try a taken username
+        result = null;
+        request.setGender("Male");
+        UserDAOTest userDAOTest = new UserDAOTest();
+        userDAOTest.setUp();
+        userDAOTest.createTable();
+        userDAOTest.addUser();
+        result = facade.register(request);
+        assertNotNull(result);
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertNull(result.getAuthToken());
+        assertEquals(result.getErrorMsg(), RegisterResult.usernameTakenMsg);
+
+        //try a valid request
+        result = null;
+        request.setUserName("untaken username");
+        result = facade.register(request);
+        assertNotNull(result);
+        assertNotNull(result.getPersonID());
+        assertEquals(result.getUserName(), request.getUserName());
+        assertNotNull(result.getAuthToken());
     }
 
 }

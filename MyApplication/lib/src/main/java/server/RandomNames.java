@@ -33,14 +33,14 @@ public class RandomNames {
     }
 
     //populate the lists from the provided JSON files
-    void loadListsFromJSON()
+    private void loadListsFromJSON()
     {
-        //TEMP: LOADING WITH TEST DATA
-        //NEEDS TO BE REPLACED WITH CODE TO READ FROM JSON
-        femaleNames = Arrays.asList("Jill", "Jane", "Jenny");
-        maleNames = Arrays.asList("Bob","Bill", "Bond");
-        lastNames = Arrays.asList("Johnson", "Stockton", "Young");
-        locations = Location.loadLocations();
+        JsonEncoder json = new JsonEncoder();
+
+        femaleNames = json.loadList("json/fnames.json");
+        maleNames = json.loadList("json/mnames.json");
+        lastNames = json.loadList("json/snames.json");
+        locations = json.loadLocations("json/locations.json");
     }
 
     //return a random female name
@@ -84,18 +84,6 @@ public class RandomNames {
             this.latitude = latitude;
             this.longitude = longitude;
         }
-
-
-        public static List<Location> loadLocations()
-        {
-            //THIS IS JUST TEST DATA
-            List<Location> locs = new ArrayList<>();
-            locs.add(new Location("USA", "Provo", 21.543, 98.435));
-            locs.add(new Location("England", "London", 12.123, 99.999));
-            locs.add(new Location("Ireland", "Dublin", 123.456, 987.655));
-            return locs;
-        }
-
 
         public String getCountry() {
             return country;

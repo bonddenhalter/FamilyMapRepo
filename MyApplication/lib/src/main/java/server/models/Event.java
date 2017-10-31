@@ -9,14 +9,14 @@ public class Event {
     private String eventID;
     private String descendant;
     private String person;
-    private double latitude;
-    private double longitude;
+    private String latitude;
+    private String longitude;
     private String country;
     private String city;
     private String eventType;
     private String year;
 
-    public Event(String eventID, String descendant, String person, double latitude, double longitude, String country, String city, String eventType, String year) {
+    public Event(String eventID, String descendant, String person, String latitude, String longitude, String country, String city, String eventType, String year) {
         this.eventID = eventID;
         this.descendant = descendant;
         this.person = person;
@@ -52,19 +52,19 @@ public class Event {
         this.person = person;
     }
 
-    public double getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 

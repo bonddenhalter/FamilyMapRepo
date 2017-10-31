@@ -14,6 +14,11 @@ import server.handlers.LoginHandler;
 import server.handlers.PeopleHandler;
 import server.handlers.PersonHandler;
 import server.handlers.RegisterHandler;
+import server.models.Event;
+import server.results.ClearResult;
+import server.results.EventResult;
+
+import static java.lang.Float.NaN;
 
 
 /**
@@ -79,13 +84,17 @@ public class Server {
 
         String portNumber = args[0];
         new Server().run(portNumber);
+//        EventResult eventResult = new EventResult(new Event(null, null, null, null, null, null, null, null, null));
+//        eventResult.setMessage("error");
+//        System.out.println(JsonEncoder.encodeObject(eventResult));
     }
 
     private static void server_init()
     {
         RandomNames randomNames = RandomNames.getInstance(); //creates class and loads lists from JSON
 
-        //create all DB tables
+        Facade facade = new Facade();
+        facade.initDatabase(); //create the database tables
     }
 
 

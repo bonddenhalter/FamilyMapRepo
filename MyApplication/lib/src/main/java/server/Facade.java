@@ -26,6 +26,8 @@ import server.results.PeopleResult;
 import server.results.PersonResult;
 import server.results.RegisterResult;
 
+import static java.lang.Float.NaN;
+
 /**
  * Created by bondd on 10/23/2017.
  */
@@ -90,21 +92,51 @@ public class Facade {
      * @param eventID the eventID of the event you want
      * @return The event info in an EventResult object. Null if there's an error.
      */
-    public EventResult event(String eventID)
+    public EventResult event(String eventID, String authToken)
     {
-        Event e = null;
+        Event failEvent = new Event(null, null, null, null, null, null, null, null, null);
+        EventResult result;
         try
         {
-            e = eventDAO.getEvent(eventID);
+            Auth a = authDAO.getAuth(authToken);
+            if (a == null) //if the auth doesn't exist
+            {
+                result = new EventResult(failEvent);
+                result.setMessage(EventResult.invalidAuthTokenMsg);
+                return result;
+            }
+
+            String username = a.getUsername();
+            Event e = eventDAO.getEvent(eventID);
+            if (e == null) //there is no event associated with the given eventID
+            {
+                result = new EventResult(failEvent);
+                result.setMessage(EventResult.invalidEventIDMsg);
+                return result;
+            }
+
+            if (!e.getDescendant().equals(username)) //if the event doesn't belong to the user
+            {
+                result = new EventResult(failEvent);
+                result.setMessage(EventResult.userPermissionMsg);
+                return result;
+            }
+
+            //success
+            result = new EventResult(e);
+            return result;
+
+
         }
         catch(SQLException ex)
         {
-            return null; //the handler must display the event result error message
+            result = new EventResult(failEvent);
+            result.setMessage(EventResult.SQLFailureMessage);
+            return result; //the handler must display the event result error message
         }
-        if (e == null)
-            return null;
-        return new EventResult(e);
     }
+
+
 
     /**
      * Returns ALL events for ALL family members of the current user. The current

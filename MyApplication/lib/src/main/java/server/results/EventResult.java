@@ -11,14 +11,28 @@ public class EventResult {
     private String descendant;
     private String eventID;
     private String personID;
-    private double latitude;
-    private double longitude;
+    private String latitude;
+    private String longitude;
     private String country;
     private String city;
     private String eventType;
     private String year;
 
-    public static final String failureMessage = "There was an error retrieving the event from the database";
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+
+    public static final String SQLFailureMessage = "There was an error retrieving the event from the database";
+    public static final String invalidAuthTokenMsg = "Error: invalid auth token.";
+    public static final String invalidEventIDMsg = "Error: invalid event ID.";
+    public static final String userPermissionMsg = "Error: the requested event does not belong to this user.";
 
     public EventResult(Event e)
     {
@@ -57,19 +71,19 @@ public class EventResult {
         this.personID = personID;
     }
 
-    public double getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 

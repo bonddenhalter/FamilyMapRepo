@@ -13,6 +13,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import server.requests.RegisterRequest;
+import server.results.ClearResult;
+import server.results.RegisterResult;
+
 public class JsonEncoder {
 
     Gson gson;
@@ -23,20 +27,35 @@ public class JsonEncoder {
     }
 
     //class to hold an array of strings called "data"
-    class ArrayHolderClass{
+   private class ArrayHolderClass{
         String[] data;
     }
 
     //class to hold an array of Locations called "data"
-    class LocationHolder
+   private class LocationHolder
     {
         RandomNames.Location[] data;
     }
 
-    //load a list of strings from a JSON
-    List<String> loadList(String filename)
+    public static RegisterRequest loadRegisterRequest(String json)
     {
         try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            RegisterRequest registerRequest = gson.fromJson(json, RegisterRequest.class);
+            return registerRequest;
+        }
+        catch (Exception ex)
+        {
+            System.out.println("ERROR READING JSON!!");
+            return null;
+        }
+    }
+
+    //load a list of strings from a JSON
+   public static List<String> loadList(String filename)
+    {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String items = fileToString(filename);
             ArrayHolderClass arrayHolderClass = gson.fromJson(items, ArrayHolderClass.class);
             return Arrays.asList(arrayHolderClass.data);
@@ -49,9 +68,10 @@ public class JsonEncoder {
     }
 
     //load locations from JSON file
-    List<RandomNames.Location> loadLocations(String filename)
+    public static List<RandomNames.Location> loadLocations(String filename)
     {
         try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String items = fileToString(filename);
             LocationHolder locationHolder = gson.fromJson(items, LocationHolder.class);
             return Arrays.asList(locationHolder.data);
@@ -62,6 +82,14 @@ public class JsonEncoder {
             return null;
         }
     }
+
+    //create a JSON from a data object
+    public static String encodeObject(Object obj)
+    {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(obj);
+    }
+
 
     static String fileToString(String filename) throws Exception {
         return new String(Files.readAllBytes(Paths.get(filename)));

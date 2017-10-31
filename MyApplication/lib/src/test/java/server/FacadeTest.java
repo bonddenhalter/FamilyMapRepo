@@ -31,6 +31,7 @@ import server.results.PeopleResult;
 import server.results.PersonResult;
 import server.results.RegisterResult;
 
+import static java.lang.Double.NaN;
 import static org.junit.Assert.*;
 import static server.dataAccess.EventDAOTest.city;
 import static server.dataAccess.EventDAOTest.city2;
@@ -93,27 +94,75 @@ public class FacadeTest {
 
     @Test
     public void event() throws Exception {
+
+        AuthDAOTest authDAOTest = new AuthDAOTest();
+        authDAOTest.setUp();
+        authDAOTest.clear();
+        AuthDAO authDAO = new AuthDAO();
+        Auth testAuth = new Auth("fake token 2", PersonDAOTest.descendant, 0); //this will match an event
+        authDAO.addAuth(testAuth);
+        authDAOTest.addAuth(); //this one won't match an event. Contains "fakeToken" and "fakeUsername"
+
         EventDAOTest daoTest = new EventDAOTest();
         daoTest.setUp();
         daoTest.clear();
         daoTest.addEvent(); //add the test event to the database
-        EventResult result = facade.event(eventID); //query that test event
 
+        //test a nonexistent auth token
+        EventResult result = facade.event(eventID, "nonexistent token"); //query that test event
+        assertNotNull(result);
+        assertNull(result.getEventID());
+        assertNull(result.getDescendant());
+        assertNull(result.getPersonID());
+        assertNull(result.getLatitude());
+        assertNull(result.getLongitude());
+        assertNull(result.getCountry());
+        assertNull(result.getCity());
+        assertNull(result.getEventType());
+        assertNull(result.getYear());
+        assertEquals(result.getMessage(), EventResult.invalidAuthTokenMsg);
+
+        //test incorrect eventID
+        result = facade.event("incorrect id", "fake token 2");
+        assertNotNull(result);
+        assertNull(result.getEventID());
+        assertNull(result.getDescendant());
+        assertNull(result.getPersonID());
+        assertNull(result.getLatitude());
+        assertNull(result.getLongitude());
+        assertNull(result.getCountry());
+        assertNull(result.getCity());
+        assertNull(result.getEventType());
+        assertNull(result.getYear());
+        assertEquals(result.getMessage(), EventResult.invalidEventIDMsg);
+
+        //test finding an event that doesn't match the user
+        result = facade.event(EventDAOTest.eventID, "fake token 2");
+        assertNotNull(result);
+        assertNull(result.getEventID());
+        assertNull(result.getDescendant());
+        assertNull(result.getPersonID());
+        assertNull(result.getLatitude());
+        assertNull(result.getLongitude());
+        assertNull(result.getCountry());
+        assertNull(result.getCity());
+        assertNull(result.getEventType());
+        assertNull(result.getYear());
+        assertEquals(result.getMessage(), EventResult.userPermissionMsg);
+
+        //test correct use
+        result = facade.event(eventID, authDAOTest.testToken);
         assertNotNull(result);
         assertEquals(result.getEventID(), eventID); //the EventResult object should hold everything from the test event
         assertEquals(result.getDescendant(), descendant);
         assertEquals(result.getPersonID(), person);
-        assertEquals(result.getLatitude(), latitude, 1); //what to use for max delta? (3rd parameter)
-        assertEquals(result.getLongitude(), longitude, 1);
+        assertEquals(result.getLatitude(), latitude); //what to use for max delta? (3rd parameter)
+        assertEquals(result.getLongitude(), longitude);
         assertEquals(result.getCountry(), country);
         assertEquals(result.getCity(), city);
         assertEquals(result.getEventType(), eventType);
         assertEquals(result.getYear(), year);
-
-        //test a nonexistent event
-        result = facade.event("nonexistent eventID");
-        assertNull(result);
-
+        assertNull(result.getMessage());
     }
 
     @Test
@@ -137,8 +186,8 @@ public class FacadeTest {
         assertEquals(result.getData()[0].getEventID(), eventID);
         assertEquals(result.getData()[0].getDescendant(), descendant);
         assertEquals(result.getData()[0].getPerson(), person);
-        assertEquals(result.getData()[0].getLatitude(), latitude, 1); //what to use for max delta? (3rd parameter)
-        assertEquals(result.getData()[0].getLongitude(), longitude, 1);
+        assertEquals(result.getData()[0].getLatitude(), latitude);
+        assertEquals(result.getData()[0].getLongitude(), longitude);
         assertEquals(result.getData()[0].getCountry(), country);
         assertEquals(result.getData()[0].getCity(), city);
         assertEquals(result.getData()[0].getEventType(), eventType);
@@ -148,8 +197,8 @@ public class FacadeTest {
         assertEquals(result.getData()[1].getEventID(), eventID2);
         assertEquals(result.getData()[1].getDescendant(), descendant);
         assertEquals(result.getData()[1].getPerson(), person2);
-        assertEquals(result.getData()[1].getLatitude(), latitude2, 1); //what to use for max delta? (3rd parameter)
-        assertEquals(result.getData()[1].getLongitude(), longitude2, 1);
+        assertEquals(result.getData()[1].getLatitude(), latitude2);
+        assertEquals(result.getData()[1].getLongitude(), longitude2);
         assertEquals(result.getData()[1].getCountry(), country2);
         assertEquals(result.getData()[1].getCity(), city2);
         assertEquals(result.getData()[1].getEventType(), eventType2);
@@ -218,7 +267,7 @@ public class FacadeTest {
     }
 
 
-    @Test
+   // @Test
     public void fill() throws Exception
     {
         PersonDAOTest personDAOTest = new PersonDAOTest();
@@ -268,7 +317,8 @@ public class FacadeTest {
         assertNotNull(result.getMessage());
         assertNotEquals(result.getMessage(), FillResult.negativeGenMessage);
         assertNotEquals(result.getMessage(), FillResult.SQLFailureMessage);
-        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);        UserDAO userDAO = new UserDAO();
+        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);
+        UserDAO userDAO = new UserDAO();
         Person user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
         checkTree(user, username, 4, personDAO, true);
 
@@ -287,7 +337,8 @@ public class FacadeTest {
         assertNotNull(result.getMessage());
         assertNotEquals(result.getMessage(), FillResult.negativeGenMessage);
         assertNotEquals(result.getMessage(), FillResult.SQLFailureMessage);
-        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);        user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
+        assertNotEquals(result.getMessage(), FillResult.unregisteredUserMessage);
+        user = personDAO.getPerson(userDAO.getUser(username).getPersonID());
         checkTree(user, username, 3, personDAO, true);
 
         //there should have been at least 15 birth events and 7 marriages
@@ -297,7 +348,7 @@ public class FacadeTest {
 
     }
 
-    @Test
+   // @Test
     public void load() throws Exception
     {
         //set up DAOs
@@ -455,14 +506,6 @@ public class FacadeTest {
         personDAOTest.clear();
         personDAOTest.addPerson();
 
-//        UserDAOTest userDAOTest = new UserDAOTest();
-//        userDAOTest.setUp();
-//        userDAOTest.createTable();
-//        userDAOTest.clear();
-//        UserDAO userDAO = new UserDAO();
-//        User u = new User(PersonDAOTest.descendant, password, email, firstName, lastName, gender, personID);
-//        userDAO.addUser(u);
-
         //test an incorrect auth token
         PersonResult result = facade.person(PersonDAOTest.personID, "nonexistent token");
         assertNotNull(result);
@@ -488,11 +531,9 @@ public class FacadeTest {
         assertNotNull(result.getFirstName());
         assertNotNull(result.getLastName());
         assertNotNull(result.getGender());
-
-
     }
 
-    @Test
+   // @Test
     public void register() throws Exception //I'm not going to test the other methods here, only possible errors specific to register()
     {
         RegisterRequest request = new RegisterRequest(username, password, email, firstName, lastName, gender);

@@ -75,10 +75,10 @@ public class RandomNames {
     {
         private String country;
         private String city;
-        private double latitude;
-        private double longitude;
+        private String latitude;
+        private String longitude;
 
-        public Location(String country, String city, double latitude, double longitude) {
+        public Location(String country, String city, String latitude, String longitude) {
             this.country = country;
             this.city = city;
             this.latitude = latitude;
@@ -101,19 +101,19 @@ public class RandomNames {
             this.city = city;
         }
 
-        public double getLatitude() {
+        public String getLatitude() {
             return latitude;
         }
 
-        public void setLatitude(double latitude) {
+        public void setLatitude(String latitude) {
             this.latitude = latitude;
         }
 
-        public double getLongitude() {
+        public String getLongitude() {
             return longitude;
         }
 
-        public void setLongitude(double longitude) {
+        public void setLongitude(String longitude) {
             this.longitude = longitude;
         }
     }

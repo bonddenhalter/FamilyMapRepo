@@ -34,8 +34,8 @@ public class EventDAO {
                 "eventID text not null primary key," +
                 "descendant text not null," +
                 "person text not null," +
-                "latitude double not null," +
-                "longitude double not null," +
+                "latitude text not null," +
+                "longitude text not null," +
                 "country text not null," +
                 "city text not null," +
                 "eventType text not null," +
@@ -61,8 +61,8 @@ public class EventDAO {
         stmt.setString(1, e.getEventID());
         stmt.setString(2, e.getDescendant());
         stmt.setString(3, e.getPerson());
-        stmt.setDouble(4, e.getLatitude());
-        stmt.setDouble(5, e.getLongitude());
+        stmt.setString(4, e.getLatitude());
+        stmt.setString(5, e.getLongitude());
         stmt.setString(6, e.getCountry());
         stmt.setString(7, e.getCity());
         stmt.setString(8, e.getEventType());
@@ -91,8 +91,8 @@ public class EventDAO {
         String eventIDResult = results.getString(1);
         String descendant = results.getString(2);
         String person = results.getString(3);
-        double latitude = results.getDouble(4);
-        double longitude = results.getDouble(5);
+        String latitude = results.getString(4);
+        String longitude = results.getString(5);
         String country = results.getString(6);
         String city = results.getString(7);
         String eventType = results.getString(8);
@@ -124,8 +124,8 @@ public class EventDAO {
             String eventIDResult = results.getString(1);
             String descendant = results.getString(2);
             String person = results.getString(3);
-            double latitude = results.getDouble(4);
-            double longitude = results.getDouble(5);
+            String latitude = results.getString(4);
+            String longitude = results.getString(5);
             String country = results.getString(6);
             String city = results.getString(7);
             String eventType = results.getString(8);

@@ -6,20 +6,20 @@ package server.requests;
 
 public class LoginRequest {
 
-    private String username;
+    private String userName;
     private String password;
 
     public LoginRequest(String username, String password) {
-        this.username = username;
+        this.userName = username;
         this.password = password;
     }
 
     public String getUsername() {
-        return username;
+        return userName;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.userName = username;
     }
 
     public String getPassword() {

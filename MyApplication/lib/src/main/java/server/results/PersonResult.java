@@ -16,7 +16,7 @@ public class PersonResult {
     private String father; //optional
     private String mother; //optional
     private String spouse; //optional
-    private String errorMsg;
+    private String message;
 
     public static String SQLFailureMsg = "There was a SQL error while trying to retrieve the person.";
     public static String invalidTokenMsg = "Error: invalid auth token.";
@@ -114,12 +114,12 @@ public class PersonResult {
         this.spouse = spouse;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 

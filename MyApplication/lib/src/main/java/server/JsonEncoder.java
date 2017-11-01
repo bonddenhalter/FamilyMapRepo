@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import server.requests.LoadRequest;
+import server.requests.LoginRequest;
 import server.requests.RegisterRequest;
 import server.results.ClearResult;
 import server.results.RegisterResult;
@@ -37,12 +39,43 @@ public class JsonEncoder {
         RandomNames.Location[] data;
     }
 
+    //for the register handler, reads the input json and returns the register request object
     public static RegisterRequest loadRegisterRequest(String json)
     {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             RegisterRequest registerRequest = gson.fromJson(json, RegisterRequest.class);
             return registerRequest;
+        }
+        catch (Exception ex)
+        {
+            System.out.println("ERROR READING JSON!!");
+            return null;
+        }
+    }
+
+    //for the load handler, reads the input json and returns a loadRequest object
+    public static LoadRequest loadLoadRequest(String json)
+    {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            LoadRequest loadRequest = gson.fromJson(json, LoadRequest.class);
+            return loadRequest;
+        }
+        catch (Exception ex)
+        {
+            System.out.println("ERROR READING JSON!!");
+            return null;
+        }
+    }
+
+    //for the login handler, reads the input json and returns a loginRequest object
+    public static LoginRequest loadloginRequest(String json)
+    {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            LoginRequest loginRequest = gson.fromJson(json, LoginRequest.class);
+            return loginRequest;
         }
         catch (Exception ex)
         {

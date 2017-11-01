@@ -7,18 +7,11 @@ import java.io.*;
 import server.handlers.ClearHandler;
 import server.handlers.DefaultHandler;
 import server.handlers.EventHandler;
-import server.handlers.EventsHandler;
 import server.handlers.FillHandler;
 import server.handlers.LoadHandler;
 import server.handlers.LoginHandler;
-import server.handlers.PeopleHandler;
 import server.handlers.PersonHandler;
 import server.handlers.RegisterHandler;
-import server.models.Event;
-import server.results.ClearResult;
-import server.results.EventResult;
-
-import static java.lang.Float.NaN;
 
 
 /**
@@ -56,12 +49,10 @@ public class Server {
         server.createContext("/user/register", new RegisterHandler());
         server.createContext("/user/login", new LoginHandler());
         server.createContext("/clear", new ClearHandler());
-        server.createContext("/fill/[username]/{generations}", new FillHandler());
+        server.createContext("/fill", new FillHandler());
         server.createContext("/load", new LoadHandler());
-        server.createContext("/person/[personId]", new PersonHandler());
-        server.createContext("/person", new PeopleHandler());
-        server.createContext("/event/[eventId]", new EventHandler());
-        server.createContext("/event", new EventsHandler());
+        server.createContext("/person", new PersonHandler());
+        server.createContext("/event", new EventHandler());
 
         //start the server
         System.out.println("Starting server");

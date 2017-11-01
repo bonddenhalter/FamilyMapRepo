@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.URL;
 
 import server.Facade;
 import server.JsonEncoder;
 import server.results.EventResult;
+import server.results.EventsResult;
 
 /**
  * Created by bondd on 10/30/2017.
@@ -41,19 +43,38 @@ public class EventHandler implements HttpHandler
                 // Get the HTTP request headers
                 Headers reqHeaders = exchange.getRequestHeaders();
                 // Check to see if an "Authorization" header is present
-                if (reqHeaders.containsKey("Authorization")) {
+                if (reqHeaders.containsKey("Authorization"))
+                {
 
                     // Extract the auth token from the "Authorization" header
                     String authToken = reqHeaders.getFirst("Authorization");
                     System.out.println("Token is: " + authToken);
 
-                    String eventID = reqHeaders.getFirst("eventID");
-                    System.out.println("event id is: " + eventID);
+                    // get the url
+                    String url = exchange.getRequestURI().toString();
+                    //split the string on the "/"
+                    String[] urlParts = url.split("/");
+                    //look at number of elements in array to determine service
+                    boolean error = true;
+                    String respData;
+                    if (urlParts.length == 3) //it passed an eventID so called event service
+                    {
+                        String eventID = urlParts[2];
                         // This is the JSON data we will return in the HTTP response body
-                    EventResult eventResult = facade.event(eventID, authToken);
-                    String respData = JsonEncoder.encodeObject(eventResult);
+                        EventResult eventResult = facade.event(eventID, authToken);
+                        respData = JsonEncoder.encodeObject(eventResult);
+                        error = (eventResult.getMessage() != null); //error if the message is not null
+                    }
+                    else if (urlParts.length == 2)//events service
+                    {
+                        EventsResult eventsResult = facade.events(authToken);
+                        respData = JsonEncoder.encodeObject(eventsResult);
+                        error = (eventsResult.getMessage() != null); //error if the message is not null
+                    }
+                    else
+                        throw new IOException();
 
-                    if (eventResult.getMessage() == null) //if there was no error
+                    if (!error) //if there was no error
                     {
                         // Start sending the HTTP response to the client, starting with
                         // the status code and any defined headers.

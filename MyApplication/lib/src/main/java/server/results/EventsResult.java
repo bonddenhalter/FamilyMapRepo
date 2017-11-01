@@ -10,7 +10,10 @@ public class EventsResult {
 
     private Event data[]; //an array of Event objects (as in EventResult)
 
-    public static final String failureMessage = "An error occured while retrieving the events.";
+    private String message;
+
+    public static final String SQLFailureMessage = "A database error occured while retrieving the events.";
+    public static final String invalidAuthMessage = "Error: invalid auth token.";
 
 
     public EventsResult(Event[] data) {
@@ -23,5 +26,13 @@ public class EventsResult {
 
     public void setData(Event[] data) {
         this.data = data;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

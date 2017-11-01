@@ -31,7 +31,6 @@ import server.results.PeopleResult;
 import server.results.PersonResult;
 import server.results.RegisterResult;
 
-import static java.lang.Double.NaN;
 import static org.junit.Assert.*;
 import static server.dataAccess.EventDAOTest.city;
 import static server.dataAccess.EventDAOTest.city2;
@@ -178,9 +177,13 @@ public class FacadeTest {
         authDaoTest.clear();
         authDaoTest.addAuth();
 
-        EventsResult result = facade.events(AuthDAOTest.testToken);
+        EventsResult result;
+
+        //test a valid query
+        result = facade.events(AuthDAOTest.testToken);
         assertNotNull(result);
         assertEquals(result.getData().length, 2);
+        assertNull(result.getMessage());
 
         //check first event
         assertEquals(result.getData()[0].getEventID(), eventID);
@@ -204,19 +207,16 @@ public class FacadeTest {
         assertEquals(result.getData()[1].getEventType(), eventType2);
         assertEquals(result.getData()[1].getYear(), year2);
 
-        //try a nonexistent one
+        //try a nonexistent auth token
         result = facade.events("nonexistent token");
-        assertNull(result);
+        assertNotNull(result);
+        assertNull(result.getData());
+        assertEquals(result.getMessage(), EventsResult.invalidAuthMessage);
     }
 
     //end should be true if the person should not have father, mother, or spouse
     private void checkPerson(Person p, String username, boolean end, boolean firstGen)
     {
-//        assertNotNull(p);
-//        assertNotNull(p.getFirstName());
-//        assertNotNull(p.getLastName());
-//        assertNotNull(p.getPersonID());
-//        assertNotNull(p.getGender());
         assertEquals(p.getDescendant(), username);
 
         assertNotEquals(p.getFirstName(), "");
@@ -227,9 +227,6 @@ public class FacadeTest {
 
         if (end)
         {
-//            assertNull(p.getSpouse());
-//            assertNull(p.getFather());
-//            assertNull(p.getMother());
             if (firstGen)
                 assertEquals(p.getSpouse(), "");
             else
@@ -239,9 +236,6 @@ public class FacadeTest {
         }
         else
         {
-//            assertNotNull(p.getSpouse());
-//            assertNotNull(p.getFather());
-//            assertNotNull(p.getMother());
             if (firstGen)
                 assertEquals(p.getSpouse(), "");
             else
@@ -267,7 +261,7 @@ public class FacadeTest {
     }
 
 
-   // @Test
+    @Test
     public void fill() throws Exception
     {
         PersonDAOTest personDAOTest = new PersonDAOTest();
@@ -348,7 +342,7 @@ public class FacadeTest {
 
     }
 
-   // @Test
+    @Test
     public void load() throws Exception
     {
         //set up DAOs
@@ -421,7 +415,7 @@ public class FacadeTest {
         assertNull(result.getAuthToken());
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
-        assertEquals(result.getErrorMessage(), LoginResult.userDoesNotExistMsg);
+        assertEquals(result.getMessage(), LoginResult.userDoesNotExistMsg);
 
         //test correct username with incorrect password
         req.setUsername(username);
@@ -430,7 +424,7 @@ public class FacadeTest {
         assertNull(result.getAuthToken());
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
-        assertEquals(result.getErrorMessage(), LoginResult.incorrectPasswordMsg);
+        assertEquals(result.getMessage(), LoginResult.incorrectPasswordMsg);
 
         //test correct username and password
         req.setPassword(password);
@@ -477,7 +471,7 @@ public class FacadeTest {
         result = facade.people("nonexistent auth token");
         assertNotNull(result);
         assertNull(result.getData());
-        assertEquals(result.getErrorMsg(), PeopleResult.invalidAuthTokenMsg);
+        assertEquals(result.getMessage(), PeopleResult.invalidAuthTokenMsg);
 
         //test actual existing token
         result = facade.people(authDAOTest.testToken);
@@ -509,20 +503,20 @@ public class FacadeTest {
         //test an incorrect auth token
         PersonResult result = facade.person(PersonDAOTest.personID, "nonexistent token");
         assertNotNull(result);
-        assertNotNull(result.getErrorMsg());
-        assertEquals(result.getErrorMsg(), PersonResult.invalidTokenMsg);
+        assertNotNull(result.getMessage());
+        assertEquals(result.getMessage(), PersonResult.invalidTokenMsg);
 
         //test incorrect personID
         result = facade.person("nonexistent personID", "fake token 2");
         assertNotNull(result);
-        assertNotNull(result.getErrorMsg());
-        assertEquals(result.getErrorMsg(), PersonResult.invalidPersonIDMsg);
+        assertNotNull(result.getMessage());
+        assertEquals(result.getMessage(), PersonResult.invalidPersonIDMsg);
 
         //test finding a person that doesn't match the user
         result = facade.person(PersonDAOTest.personID, AuthDAOTest.testToken);
         assertNotNull(result);
-        assertNotNull(result.getErrorMsg());
-        assertEquals(result.getErrorMsg(), PersonResult.userPermissiongMsg);
+        assertNotNull(result.getMessage());
+        assertEquals(result.getMessage(), PersonResult.userPermissiongMsg);
 
         //test a correct result
         result = facade.person(PersonDAOTest.personID, "fake token 2");
@@ -533,7 +527,7 @@ public class FacadeTest {
         assertNotNull(result.getGender());
     }
 
-   // @Test
+    @Test
     public void register() throws Exception //I'm not going to test the other methods here, only possible errors specific to register()
     {
         RegisterRequest request = new RegisterRequest(username, password, email, firstName, lastName, gender);
@@ -545,7 +539,7 @@ public class FacadeTest {
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
         assertNull(result.getAuthToken());
-        assertEquals(result.getErrorMsg(), RegisterResult.requestErrorMsg);
+        assertEquals(result.getMessage(), RegisterResult.requestErrorMsg);
 
         //try an invalid gender
         result = null;
@@ -556,7 +550,7 @@ public class FacadeTest {
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
         assertNull(result.getAuthToken());
-        assertEquals(result.getErrorMsg(), RegisterResult.requestErrorMsg);
+        assertEquals(result.getMessage(), RegisterResult.requestErrorMsg);
 
         //try a taken username
         result = null;
@@ -570,7 +564,7 @@ public class FacadeTest {
         assertNull(result.getPersonID());
         assertNull(result.getUserName());
         assertNull(result.getAuthToken());
-        assertEquals(result.getErrorMsg(), RegisterResult.usernameTakenMsg);
+        assertEquals(result.getMessage(), RegisterResult.usernameTakenMsg);
 
         //try a valid request
         result = null;

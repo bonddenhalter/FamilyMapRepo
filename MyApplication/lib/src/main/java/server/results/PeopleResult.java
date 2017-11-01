@@ -1,7 +1,5 @@
 package server.results;
 
-import java.util.Arrays;
-
 import server.models.Person;
 
 /**
@@ -12,7 +10,7 @@ import server.models.Person;
 public class PeopleResult {
 
     private Person[] data; //an array of Person objects (as in PersonResult)
-    private String errorMsg;
+    private String message;
     public static String invalidAuthTokenMsg = "Error: Invalid auth token.";
     public static String SQLFailureMsg = "Error: SQL failure.";
 
@@ -28,11 +26,11 @@ public class PeopleResult {
         this.data = data;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

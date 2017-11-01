@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.util.List;
 
 import server.Facade;
 import server.JsonEncoder;
@@ -69,7 +68,7 @@ public class RegisterHandler implements HttpHandler
                 RegisterResult registerResult = facade.register(registerRequest);
                 String respData = JsonEncoder.encodeObject(registerResult);
 
-                if (registerResult.getErrorMsg() == null) //if there was not an error
+                if (registerResult.getMessage() == null) //if there was not an error
                 {
                     // Start sending the HTTP response to the client, starting with
                     // the status code and any defined headers.

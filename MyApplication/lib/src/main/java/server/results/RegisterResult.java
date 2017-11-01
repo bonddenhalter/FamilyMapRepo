@@ -10,7 +10,7 @@ public class RegisterResult {
     private String userName;
     private String personID;
 
-    private String errorMsg;
+    private String message;
 
     public static String SQLFailureMsg = "There was a SQL error when processing the REGISTER request.";
     public static String usernameTakenMsg = "Error: the username is already taken by another user.";
@@ -47,12 +47,12 @@ public class RegisterResult {
         this.personID = personID;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 

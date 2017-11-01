@@ -26,8 +26,6 @@ import server.results.PeopleResult;
 import server.results.PersonResult;
 import server.results.RegisterResult;
 
-import static java.lang.Float.NaN;
-
 /**
  * Created by bondd on 10/23/2017.
  */
@@ -142,7 +140,7 @@ public class Facade {
      * Returns ALL events for ALL family members of the current user. The current
      * user is determined from the provided auth token.
      * @param authToken the authToken of the current user
-     * @return all events for all family members of the current user, contained in an EventsResult object. Null if there's an error
+     * @return all events for all family members of the current user, contained in an EventsResult object.
      */
     public EventsResult events(String authToken)
     {
@@ -151,20 +149,27 @@ public class Facade {
         {
             //get the current user from the auth token
             Auth auth = authDAO.getAuth(authToken);
-            if (auth == null)
-                return null;
+            if (auth == null)  //invalid auth token
+            {
+                result = new EventsResult(null);
+                result.setMessage(EventsResult.invalidAuthMessage);
+                return result; //return result with null data and an error message
+            }
             String user = auth.getUsername();
 
             //get events
             List<Event> events = eventDAO.getEvents(user);
             Event[] eventArray = events.toArray(new Event[0]);
             result = new EventsResult(eventArray);
+            result.setMessage(null);
+            return result;
         }
         catch (SQLException ex)
         {
-            return null;
+            result = new EventsResult(null);
+            result.setMessage(EventsResult.SQLFailureMessage);
+            return result;
         }
-        return result;
     }
 
     private String generateRandomID()
@@ -426,7 +431,7 @@ public class Facade {
             User u = userDAO.getUser(r.getUsername());
             if (u == null) {
                 result = new LoginResult(null, null, null);
-                result.setErrorMessage(LoginResult.userDoesNotExistMsg);
+                result.setMessage(LoginResult.userDoesNotExistMsg);
             }
             else
             {
@@ -440,14 +445,14 @@ public class Facade {
                 else
                 {
                     result = new LoginResult(null, null, null);
-                    result.setErrorMessage(LoginResult.incorrectPasswordMsg);
+                    result.setMessage(LoginResult.incorrectPasswordMsg);
                 }
             }
         }
         catch (SQLException ex)
         {
             result = new LoginResult(null, null, null);
-            result.setErrorMessage(LoginResult.SQLFailureMsg);
+            result.setMessage(LoginResult.SQLFailureMsg);
         }
         return result;
     }
@@ -467,7 +472,7 @@ public class Facade {
             if (a == null) //if the auth token doesn't exist
             {
                 result = new PeopleResult(null);
-                result.setErrorMsg(PeopleResult.invalidAuthTokenMsg);
+                result.setMessage(PeopleResult.invalidAuthTokenMsg);
             }
             else //valid result
             {
@@ -479,7 +484,7 @@ public class Facade {
         catch (SQLException ex)
         {
             result = new PeopleResult(null);
-            result.setErrorMsg(PeopleResult.SQLFailureMsg);
+            result.setMessage(PeopleResult.SQLFailureMsg);
         }
         return result;
     }
@@ -499,7 +504,7 @@ public class Facade {
             if (a == null) //if the auth doesn't exist
             {
                 result = new PersonResult(null);
-                result.setErrorMsg(PersonResult.invalidTokenMsg);
+                result.setMessage(PersonResult.invalidTokenMsg);
                 return result;
             }
 
@@ -508,14 +513,14 @@ public class Facade {
             if (p == null) //if there is no person with the given personID
             {
                 result = new PersonResult(null);
-                result.setErrorMsg(PersonResult.invalidPersonIDMsg);
+                result.setMessage(PersonResult.invalidPersonIDMsg);
                 return result;
             }
 
             if (!p.getDescendant().equals(username)) //if the descendant doesn't match the user, it doesn't belong to them
             {
                 result = new PersonResult(null);
-                result.setErrorMsg(PersonResult.userPermissiongMsg);
+                result.setMessage(PersonResult.userPermissiongMsg);
                 return result;
             }
 
@@ -525,7 +530,7 @@ public class Facade {
         catch (SQLException ex)
         {
             result = new PersonResult(null);
-            result.setErrorMsg(PersonResult.SQLFailureMsg);
+            result.setMessage(PersonResult.SQLFailureMsg);
             return result;
         }
     }
@@ -560,7 +565,7 @@ public class Facade {
             if (!isRequestValid(r))
             {
                 result = new RegisterResult(null, null, null);
-                result.setErrorMsg(RegisterResult.requestErrorMsg);
+                result.setMessage(RegisterResult.requestErrorMsg);
                 return result;
             }
 
@@ -568,7 +573,7 @@ public class Facade {
             if (userDAO.getUser(r.getUserName()) != null)
             {
                 result = new RegisterResult(null, null, null);
-                result.setErrorMsg(RegisterResult.usernameTakenMsg);
+                result.setMessage(RegisterResult.usernameTakenMsg);
                 return result;
             }
 
@@ -583,7 +588,7 @@ public class Facade {
             if (fillResult.getMessage().equals(FillResult.negativeGenMessage) || fillResult.getMessage().equals(FillResult.SQLFailureMessage) || fillResult.getMessage().equals(FillResult.unregisteredUserMessage))
             {
                 result = new RegisterResult(null, null, null);
-                result.setErrorMsg(fillResult.getMessage());
+                result.setMessage(fillResult.getMessage());
                 return result;
             }
 
@@ -593,7 +598,7 @@ public class Facade {
             if (loginResult.getAuthToken() == null) //if any data points are null, there was a failure
             {
                 result = new RegisterResult(null, null, null);
-                result.setErrorMsg(loginResult.getErrorMessage());
+                result.setMessage(loginResult.getMessage());
                 return result;
             }
 
@@ -605,7 +610,7 @@ public class Facade {
         catch (SQLException ex)
         {
             result = new RegisterResult(null, null, null);
-            result.setErrorMsg(RegisterResult.SQLFailureMsg);
+            result.setMessage(RegisterResult.SQLFailureMsg);
             return result;
         }
     }

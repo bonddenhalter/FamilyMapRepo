@@ -4,7 +4,7 @@ package server.models;
  * Represents a row of the Users database table
  */
 public class User {
-    private String username;
+    private String userName;
     private String password;
     private String email;
     private String firstName;
@@ -13,7 +13,7 @@ public class User {
     private String personID;
 
     public User(String username, String password, String email, String firstName, String lastName, String gender, String personID) {
-        this.username = username;
+        this.userName = username;
         this.password = password;
         this.email = email;
         this.firstName = firstName;
@@ -23,10 +23,10 @@ public class User {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.userName = username;
     }
 
-    public String getUsername() {return this.username;}
+    public String getUsername() {return this.userName;}
 
     public String getPassword() {
         return password;

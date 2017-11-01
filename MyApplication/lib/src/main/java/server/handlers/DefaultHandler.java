@@ -26,9 +26,22 @@ public class DefaultHandler implements HttpHandler {
 
         try
         {
-            //read in html file
+            // get the url
+            String url = exchange.getRequestURI().toString();
+            //split the string on the "/"
+            String[] urlParts = url.split("/");
+
+            String filePath;
+            if (urlParts.length == 0)
+                filePath = "web/index.html";
+            else if (urlParts.length == 3)
+                filePath = "web/" + urlParts[1] + "/" + urlParts[2];
+            else
+                throw new IOException();
+
+            //read in file
             String respData = "";
-            BufferedReader in = new BufferedReader(new FileReader("web/index.html"));
+            BufferedReader in = new BufferedReader(new FileReader(filePath));
             String str;
             while ((str = in.readLine()) != null) {
                 respData +=str;

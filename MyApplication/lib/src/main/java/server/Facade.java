@@ -428,6 +428,12 @@ public class Facade {
         LoginResult result;
         try
         {
+            if (r.getPassword() == null || r.getUsername() == null)
+            {
+                result = new LoginResult(null, null, null);
+                result.setMessage(LoginResult.invalidRequestMsg);
+                return result;
+            }
             User u = userDAO.getUser(r.getUsername());
             if (u == null) {
                 result = new LoginResult(null, null, null);

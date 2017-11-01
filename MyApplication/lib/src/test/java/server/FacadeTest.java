@@ -408,9 +408,21 @@ public class FacadeTest {
         userDAOTest.clear();
         userDAOTest.addUser();
 
+        LoginRequest req;
+        LoginResult result;
+
+        //test missing request parameter
+        req = new LoginRequest("nonexistent username", null);
+        result = facade.login(req);
+        assertNotNull(result);
+        assertNull(result.getAuthToken());
+        assertNull(result.getPersonID());
+        assertNull(result.getUserName());
+        assertEquals(result.getMessage(), LoginResult.invalidRequestMsg);
+
         //test username that doesn't exist
-        LoginRequest req = new LoginRequest("nonexistant username", "whatever password");
-        LoginResult result = facade.login(req);
+        req = new LoginRequest("nonexistant username", "whatever password");
+        result = facade.login(req);
         assertNotNull(result);
         assertNull(result.getAuthToken());
         assertNull(result.getPersonID());

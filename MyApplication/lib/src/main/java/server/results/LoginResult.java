@@ -15,6 +15,7 @@ public class LoginResult {
     public static String userDoesNotExistMsg = "Login Error: The username does not exist.";
     public static String incorrectPasswordMsg = "Login Error: Incorrect Password.";
     public static String SQLFailureMsg = "Login Error: a SQL error occured.";
+    public static String invalidRequestMsg = "Login Error: Request property missing or has invalid value.";
 
     public LoginResult(String authToken, String userName, String personID) {
         this.authToken = authToken;

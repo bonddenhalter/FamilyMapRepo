@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 
 import server.Facade;
 import server.JsonEncoder;
+import server.models.Person;
 import server.requests.LoadRequest;
 import server.requests.RegisterRequest;
 import server.results.LoadResult;
@@ -53,9 +54,20 @@ public class LoadHandler implements HttpHandler
                 //decode the JSON data
                 LoadRequest loadRequest = JsonEncoder.loadLoadRequest(reqData);
 
+                //if spouse, father, or mother is null for a Person, change it to empty string
+                for (Person p: loadRequest.getPersons())
+                {
+                    if (p.getFather() == null)
+                        p.setFather("");
+                    if (p.getMother() == null)
+                        p.setMother("");
+                    if (p.getSpouse() == null)
+                        p.setSpouse("");
+                }
+
                 // This is the JSON data we will return in the HTTP response body
                 LoadResult loadResult = facade.load(loadRequest);
-                String respData = JsonEncoder.encodeObject(loadRequest);
+                String respData = JsonEncoder.encodeObject(loadResult);
 
                 String message = loadResult.getMessage();
                 boolean error = (message.equals(LoadResult.NullFailureMessage) || message.equals(LoadResult.SQLFailureMessage));

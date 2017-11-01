@@ -48,7 +48,7 @@ public class Facade {
         userDAO = new UserDAO();
     }
 
-    //I DON'T KNOW IF THIS SHOULD GO HERE BUT IT WILL CREATE THE DATABASE TABLES
+    //this will create all of the database tables
     public void initDatabase()
     {
         try {
@@ -79,7 +79,6 @@ public class Facade {
         }
         catch (SQLException e) { //return an error message instead of shutting down the server.
             return new ClearResult(ClearResult.failureMessage);
-            //Do I need to somehow identify the source of this exception?
         }
 
         return new ClearResult(ClearResult.successMessage); //return the success message in a ClearResult object
@@ -241,9 +240,6 @@ public class Facade {
 
         Person me = new Person(personID, descendant, firstName, lastName, gender, father, mother, spouse);
 
-       // if (generations == 0)
-        //    personDAO.addPerson(me); //add self to database
-
         return me; //return new person
     }
 
@@ -255,6 +251,7 @@ public class Facade {
         return baseYear - randOffset;
     }
 
+    //creates an event using the random values from the provided JSON files
     private Event generateEvent(String descendant, String personID, int baseYear, String eventType)
     {
         String eventID = generateRandomID();
@@ -288,10 +285,8 @@ public class Facade {
 
             //check if there is any data already associated with the user name
             //if there is, delete it
-            //authDAO.delete(username); //I probably don't need to delete this
             eventDAO.delete(username);
             personDAO.delete(username);
-           // userDAO.delete(username); //don't delete here; they need to be registered
 
            Person user = new Person("","","","","","","","");
 
@@ -552,7 +547,6 @@ public class Facade {
         if (r.getGender() != "Male" && r.getGender() != "Female")
             valid = false;
 
-        //NEED TO CHECK VALID EMAIL, VALID USERNAME, VALID PASSWORD, OR ANYTHING ELSE?
         return valid;
     }
 

@@ -75,9 +75,6 @@ public class Server {
 
         String portNumber = args[0];
         new Server().run(portNumber);
-//        EventResult eventResult = new EventResult(new Event(null, null, null, null, null, null, null, null, null));
-//        eventResult.setMessage("error");
-//        System.out.println(JsonEncoder.encodeObject(eventResult));
     }
 
     private static void server_init()

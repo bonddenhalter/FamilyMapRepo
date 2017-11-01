@@ -16,8 +16,7 @@ import java.util.List;
 import server.requests.LoadRequest;
 import server.requests.LoginRequest;
 import server.requests.RegisterRequest;
-import server.results.ClearResult;
-import server.results.RegisterResult;
+
 
 public class JsonEncoder {
 

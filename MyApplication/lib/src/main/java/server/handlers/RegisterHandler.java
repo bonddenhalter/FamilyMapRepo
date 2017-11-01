@@ -43,8 +43,6 @@ public class RegisterHandler implements HttpHandler
                 // Get the HTTP request headers
                 Headers reqHeaders = exchange.getRequestHeaders();
 
-                // Extract the JSON string from the HTTP request body
-
                 // Get the request body input stream
                 InputStream reqBody = exchange.getRequestBody();
                 // Read JSON string from the input stream
@@ -73,9 +71,6 @@ public class RegisterHandler implements HttpHandler
                     // Start sending the HTTP response to the client, starting with
                     // the status code and any defined headers.
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-
-                    // Now that the status code and headers have been sent to the client,
-                    // next we send the JSON data in the HTTP response body.
 
                     // Get the response body output stream.
                     OutputStream respBody = exchange.getResponseBody();

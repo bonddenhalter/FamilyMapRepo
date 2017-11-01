@@ -105,23 +105,4 @@ public class AuthDAO {
         stmt.close();
         connection.close();
     }
-
-
-    /**
-     * Joins a list of strings into a comma delimited string
-     * @param values the list of strings
-     * @return the combined string
-     */
-//    public String joinList(List<String> values)
-//    {
-//        StringBuilder builder = new StringBuilder();
-//        for (String s : values)
-//        {
-//            builder.append(s);
-//            builder.append(", ");
-//        }
-//        builder.delete(builder.lastIndexOf(","), builder.length()); //remove the extra comma and space at the end
-//        return builder.toString();
-//    }
-
 }

@@ -39,7 +39,6 @@ public class ClearHandler implements HttpHandler {
 
                 if (clearResult.getMessage() == ClearResult.successMessage) //operation was successful
                 {
-                    //System.out.println("clear handler");
                     // Start sending the HTTP response to the client, starting with
                     // the status code and any defined headers.
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
@@ -47,8 +46,7 @@ public class ClearHandler implements HttpHandler {
                     OutputStream respBody = exchange.getResponseBody();
                     // Write the JSON string to the output stream.
                     writeString(respData, respBody);
-                    // Close the output stream.  This is how Java knows we are done
-                    // sending data and the response is complete/
+                    // Close the output stream.
                     respBody.close();
 
                     success = true;
